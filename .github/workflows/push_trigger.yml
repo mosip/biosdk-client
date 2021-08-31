@@ -10,10 +10,14 @@ on:
       - 1.1.*
       - MOSIP-11719
 <<<<<<< HEAD
+<<<<<<< HEAD
       - 1.2.*
 =======
       -1.2.*
 >>>>>>> c7e10b1 (updating push trigger branch)
+=======
+      - 1.2.*
+>>>>>>> 8381326 (Update push_trigger.yml)
   
 jobs:
   build-kernel-ref-idobjectvalidator:
