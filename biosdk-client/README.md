@@ -1,6 +1,6 @@
-# Bio SDK client
+# Bio-SDK client
 
-This library provides methods to connect with SDK serivces for Bio SDK related functionality. It can be used by ID authentication & ID repo services to perform 1:N match, segmentation, extraction etc.
+This library provides implementation of [IBioAPI](https://github.com/mosip/commons/blob/master/kernel/kernel-biometrics-api/src/main/java/io/mosip/kernel/biometrics/spi/IBioApi.java) that internally connects with Bio-SDK serivces for Bio SDK related functionality. It can be used by ID authentication & ID repo services to perform 1:N match, segmentation, extraction etc.
 
 It is used by:
 * authentication-internal-service
@@ -13,6 +13,18 @@ It is used by:
 * Maven version >= 3.6
 
 ## Configuration
+By Bio-SDK Service URLs can be disticnt for different formats of a modality from the `initParams` of `init` method. For example, below key-value pair should be passed in initParams for 'minutiea' format.
+```
+finger.format.url.minutiea -> "<Bio-SDK Service URL for minutiea format>"
+```
+For a default format, common for any formats use `.default` suffix
+```
+finger.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format of finger biomertrics>"
+iris.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format of iris biometrics>"
+face.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format or face biometrics>"
+```
+
+If the above URLs are not specified in initParams, it will take a default Bio-SDK service URL from below property.
 ```properties
 mosip_biosdk_service=<Bio SDK service url>
 ```
