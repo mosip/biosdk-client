@@ -1,7 +1,5 @@
-# mosip-ref-impl
-This repository contains components that can be customized by a country. For example, pre-registration-ui that builds on top of the Pre-Registration services can be customized by a country as per their needs.
-
-
+# Bio-SDK Client
+This library provides implementation of [IBioAPI](https://github.com/mosip/commons/blob/master/kernel/kernel-biometrics-api/src/main/java/io/mosip/kernel/biometrics/spi/IBioApi.java) that internally connects with Bio-SDK serivces for Bio SDK related functionality. It can be used by ID authentication & ID repo services to perform 1:N match, segmentation, extraction etc.
 
 ---
 ### About MOSIP
