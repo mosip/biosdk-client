@@ -1,5 +1,5 @@
-# mosip-ref-impl
-This repository contains components that can be customized by a country. For example, pre-registration-ui that builds on top of the Pre-Registration services can be customized by a country as per their needs.
+[![Maven Package upon a push](https://github.com/mosip/biosdk-client/actions/workflows/push_trigger.yml/badge.svg?branch=master)](https://github.com/mosip/biosdk-client/actions/workflows/push_trigger.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=master&id=mosip_biosdk-client)
 
 
 
