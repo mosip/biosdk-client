@@ -39,7 +39,7 @@ import io.mosip.kernel.biometrics.model.MatchDecision;
 import io.mosip.kernel.biometrics.model.QualityCheck;
 import io.mosip.kernel.biometrics.model.Response;
 import io.mosip.kernel.biometrics.model.SDKInfo;
-import io.mosip.kernel.biometrics.spi.IBioApi;
+import io.mosip.kernel.biometrics.spi.IBioApiV2;
 import io.mosip.kernel.core.logger.spi.Logger;
 
 /**
@@ -51,7 +51,7 @@ import io.mosip.kernel.core.logger.spi.Logger;
  * @author Loganathan Sekar
  * 
  */
-public class Client_V_1_0 implements IBioApi {
+public class Client_V_1_0 implements IBioApiV2 {
 
 	private static final String FORMAT_SUFFIX = ".format";
 
@@ -386,6 +386,7 @@ public class Client_V_1_0 implements IBioApi {
 	}
 
 	@Override
+	@Deprecated
 	public BiometricRecord convertFormat(BiometricRecord sample, String sourceFormat, String targetFormat,
 			Map<String, String> sourceParams, Map<String, String> targetParams, List<BiometricType> modalitiesToConvert) {
 		BiometricRecord resBiometricRecord = null;
@@ -429,7 +430,7 @@ public class Client_V_1_0 implements IBioApi {
 		requestDto.setRequest(Util.base64Encode(gson.toJson(body)));
 		return requestDto;
 	}
-
+	
 	private void errorHandler(List<ErrorDto> errors){
 	    if(errors != null){
 	        for (ErrorDto errorDto: errors){
@@ -437,5 +438,13 @@ public class Client_V_1_0 implements IBioApi {
             }
         }
     }
+
+	@Override
+	public Response<BiometricRecord> convertFormatV2(BiometricRecord sample, String sourceFormat, String targetFormat,
+			Map<String, String> sourceParams, Map<String, String> targetParams,
+			List<BiometricType> modalitiesToConvert) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
