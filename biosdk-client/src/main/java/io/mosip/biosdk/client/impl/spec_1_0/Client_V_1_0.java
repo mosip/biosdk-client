@@ -483,12 +483,4 @@ public class Client_V_1_0 implements IBioApiV2 {
         }
     }
 
-	@Override
-	public Response<BiometricRecord> convertFormatV2(BiometricRecord sample, String sourceFormat, String targetFormat,
-			Map<String, String> sourceParams, Map<String, String> targetParams,
-			List<BiometricType> modalitiesToConvert) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
