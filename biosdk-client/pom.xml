@@ -13,7 +13,7 @@
 
     <artifactId>biosdk-client</artifactId>
     <groupId>io.mosip.biosdk</groupId>
-    <version>1.2.0.1-B2-SNAPSHOT</version>
+    <version>1.2.0.1-B2</version>
     <name>biosdk-client</name>
 
     <description>Sample implementation of biometrics SDK client</description>
@@ -67,7 +67,7 @@
         <!-- Kernel -->
         <kernel.logger.logback.version>1.2.0.1-B1</kernel.logger.logback.version>
         <kernel.core.version>1.2.0.1-B1</kernel.core.version>
-	<kernel.biometrics.api.version>1.2.0.1-B2-SNAPSHOT</kernel.biometrics.api.version>
+	<kernel.biometrics.api.version>1.2.0.1-B2</kernel.biometrics.api.version>
     </properties>
 
     <dependencies>
