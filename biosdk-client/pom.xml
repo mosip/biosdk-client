@@ -67,7 +67,7 @@
         <!-- Kernel -->
         <kernel.logger.logback.version>1.2.0.1-B1</kernel.logger.logback.version>
         <kernel.core.version>1.2.0.1-B1</kernel.core.version>
-	<kernel.biometrics.api.version>1.2.0.1-B2-SNAPSHOT</kernel.biometrics.api.version>
+	    <kernel.biometrics.api.version>1.2.1-SNAPSHOT</kernel.biometrics.api.version>
     </properties>
 
     <dependencies>
@@ -378,7 +378,31 @@
                     </execution>
                 </executions>
             </plugin>
-
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <phase>validate</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                    <includeOnlyProperties>
+                        <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
+                        <includeOnlyProperty>^git.commit.id.(abbrev|full)$</includeOnlyProperty>
+                    </includeOnlyProperties>
+                    <commitIdGenerationMode>full</commitIdGenerationMode>
+                    <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+                    <!-- <format>json</format> -->
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <profiles>
