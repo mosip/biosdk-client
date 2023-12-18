@@ -4,7 +4,7 @@ on:
   release:
     types: [published]
   pull_request:
-    types: [opened]
+    types: [opened, reopened, synchronize]
   workflow_dispatch:
     inputs:
       message:
@@ -50,7 +50,7 @@ jobs:
 
   sonar_analysis:
     needs: build-biosdk-client
-    if: "${{ github.event_name != 'pull_request' }}"
+    if: "${{ github.event_name != 'pull_request' && github.event_name != 'release' && github.event_name != 'prerelease' && github.event_name != 'publish' }}"
     uses: mosip/kattu/.github/workflows/maven-sonar-analysis.yml@master
     with:
       SERVICE_LOCATION: ./biosdk-client
