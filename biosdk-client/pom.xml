@@ -65,7 +65,7 @@
         <springframework.version>5.0.6.RELEASE</springframework.version>
 
         <!-- Kernel -->
-        <kernel.logger.logback.version>1.2.0.1-B3</kernel.logger.logback.version>
+        <kernel.logger.logback.version>1.2.0.1-B2</kernel.logger.logback.version>
         <kernel.core.version>1.2.0.1-B2</kernel.core.version>
 	<kernel.biometrics.api.version>1.2.0.1-B3</kernel.biometrics.api.version>
     </properties>
