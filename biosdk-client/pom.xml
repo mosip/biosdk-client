@@ -66,7 +66,7 @@
 
         <!-- Kernel -->
         <kernel.logger.logback.version>1.2.0.1-B3</kernel.logger.logback.version>
-        <kernel.core.version>1.2.0.1-B3</kernel.core.version>
+        <kernel.core.version>1.2.0.1-B2</kernel.core.version>
 	<kernel.biometrics.api.version>1.2.0.1-B3</kernel.biometrics.api.version>
     </properties>
 
@@ -180,7 +180,7 @@
         <dependency>
         	<groupId>io.mosip.kernel</groupId>
         	<artifactId>kernel-core</artifactId>
-        	<version>${kernel.core.version}</version>
+        	<version>1.2.0.1-B2</version>
         </dependency>
     </dependencies>
 
