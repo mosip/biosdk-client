@@ -13,7 +13,7 @@
 
     <artifactId>biosdk-client</artifactId>
     <groupId>io.mosip.biosdk</groupId>
-    <version>1.2.0.1-B2</version>
+    <version>1.2.0.1-B3</version>
     <name>biosdk-client</name>
 
     <description>Sample implementation of biometrics SDK client</description>
@@ -65,9 +65,9 @@
         <springframework.version>5.0.6.RELEASE</springframework.version>
 
         <!-- Kernel -->
-        <kernel.logger.logback.version>1.2.0.1-B1</kernel.logger.logback.version>
-        <kernel.core.version>1.2.0.1-B1</kernel.core.version>
-	<kernel.biometrics.api.version>1.2.0.1-B2</kernel.biometrics.api.version>
+        <kernel.logger.logback.version>1.2.0.1-B2</kernel.logger.logback.version>
+        <kernel.core.version>1.2.0.1-B2</kernel.core.version>
+	<kernel.biometrics.api.version>1.2.0.1-B3</kernel.biometrics.api.version>
     </properties>
 
     <dependencies>
@@ -378,7 +378,31 @@
                     </execution>
                 </executions>
             </plugin>
-
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>get-the-git-infos</id>
+                        <goals>
+                            <goal>revision</goal>
+                        </goals>
+                        <phase>validate</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                    <includeOnlyProperties>
+                        <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
+                        <includeOnlyProperty>^git.commit.id.(abbrev|full)$</includeOnlyProperty>
+                    </includeOnlyProperties>
+                    <commitIdGenerationMode>full</commitIdGenerationMode>
+                    <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+                    <!-- <format>json</format> -->
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <profiles>

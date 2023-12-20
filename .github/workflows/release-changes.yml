@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       MESSAGE:
-        description: 'Triggered for release or pe-release'
+        description: 'Triggered for release or pre-release'     
         required: false
         default: 'Release Preparation'
       RELEASE_TAG:
