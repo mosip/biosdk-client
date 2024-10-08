@@ -103,7 +103,9 @@ public class Client_V_1_0 implements IBioApiV2 {
 	 * for JSON serialization and deserialization.
 	 */
 	public Client_V_1_0() {
-		gson = new GsonBuilder().serializeNulls().create();
+		gson = new GsonBuilder()
+				.serializeNulls()
+				.create();
 		errorDtoListType = new TypeToken<List<ErrorDto>>() {
 		}.getType();
 	}

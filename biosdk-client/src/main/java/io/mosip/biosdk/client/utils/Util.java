@@ -49,7 +49,6 @@ public class Util {
 	private static Logger utilLogger = LoggerConfig.logConfig(Util.class);
 
 	private Util() {
-		throw new IllegalStateException("Util class");
 	}
 
 	/**
@@ -88,7 +87,6 @@ public class Util {
 				Gson gson = new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
 				utilLogger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "Request: ", gson.toJson(request.getBody()));
 			}
-
 			response = restTemplate.exchange(url, httpMethodType, request, responseClass);
 
 			Object responseBodyObject = response.getBody();
@@ -98,11 +96,10 @@ public class Util {
 				utilLogger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "Response: ", responseBody);
 			}
 		} catch (RestClientException ex) {
-			ex.printStackTrace();
+			utilLogger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "errors", ex);
 			throw new RestClientException("rest call failed");
 		}
 		return response;
-
 	}
 
 	/**
