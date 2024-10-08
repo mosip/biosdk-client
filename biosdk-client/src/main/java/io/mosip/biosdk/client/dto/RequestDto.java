@@ -26,7 +26,7 @@ public class RequestDto {
 	private String version;
 
 	/**
-	 * The serialized request data in JSON or another format.
+	 * The serialized request data in JSON and base64 encoded.
 	 */
 	private String request;
 }
