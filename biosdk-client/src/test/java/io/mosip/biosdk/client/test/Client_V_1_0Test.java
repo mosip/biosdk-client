@@ -50,31 +50,39 @@ class Client_V_1_0Test {
         		.serializeNulls().create();
     }
 	
-	// Test Constructor Initialization
 	@Test
 	void testConstructorInitialization() {
 		Client_V_1_0 client = new Client_V_1_0();
 		assertNotNull(client);
 	}
 
-	// Test init() Method - Successful SDK Initialization
 	@Test
 	void testInit_Successful() throws BioSdkClientException {
 		Client_V_1_0 client = new Client_V_1_0();
 
-		// Mock the initialization parameters
         Map<String, String> initParams = new HashMap<>();
         initParams.put("param1", "value1");
         initParams.put("param2", "value2");
 
-		// Run the init method
 		SDKInfo result = client.init(initParams);
 
-		// Assertions
 		assertNotNull(result);
 	}
 
-	// Test checkQuality method - Successful case
+	@Test
+    void testInitWithValidParams() {
+		Client_V_1_0 client = new Client_V_1_0();
+		Map<String, String> initParams = new HashMap<>();
+
+		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+
+        // Call the method
+        SDKInfo result = client.init(initParams);
+
+        // Verify and assert
+        assertNotNull(result);
+    }
+	
 	@Test
 	void testCheckQuality_Success() throws Exception {
 		Client_V_1_0 client = spy(new Client_V_1_0());
