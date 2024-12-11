@@ -2,6 +2,7 @@ package io.mosip.biosdk.client.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.Gson;
@@ -87,7 +89,7 @@ class UtilTest {
 		headersMap.put("Authorization", "Bearer token");
 
 		// Mock response for /biosdk-service/init
-		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response.json", UtilTest.class),
+		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response_success.json", UtilTest.class),
 				StandardCharsets.UTF_8);
 
 		mockWebServer.enqueue(new MockResponse().setBody(mockResponse).addHeader("Content-Type", "application/json")
@@ -116,7 +118,7 @@ class UtilTest {
 		RequestDto requestDto = generateNewRequestDto(initRequestDto);
 
 		// Mock response for /biosdk-service/init
-		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response.json", UtilTest.class),
+		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response_success.json", UtilTest.class),
 				StandardCharsets.UTF_8);
 
 		mockWebServer.enqueue(new MockResponse().setBody(mockResponse).addHeader("Content-Type", "application/json")
@@ -156,7 +158,7 @@ class UtilTest {
 		RequestDto requestDto = generateNewRequestDto(initRequestDto);
 
 		// Mock response for /biosdk-service/init
-		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response.json", UtilTest.class),
+		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response_success.json", UtilTest.class),
 				StandardCharsets.UTF_8);
 
 		mockWebServer.enqueue(new MockResponse().setBody(mockResponse).addHeader("Content-Type", "application/json")
@@ -190,7 +192,7 @@ class UtilTest {
 		RequestDto requestDto = generateNewRequestDto(initRequestDto);
 
 		// Mock response for /biosdk-service/init
-		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response.json", UtilTest.class),
+		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response_success.json", UtilTest.class),
 				StandardCharsets.UTF_8);
 
 		mockWebServer.enqueue(new MockResponse().setBody(mockResponse).addHeader("Content-Type", "application/json")
@@ -207,6 +209,72 @@ class UtilTest {
 		System.clearProperty("mosip_biosdk_request_response_debug");
 	}
 
+	@Test
+	void testDebugRequestResponseLoggingDisabledAndNullBody() throws IOException {
+	    // Set environment variable for debugging (disabled)
+	    System.setProperty("mosip_biosdk_request_response_debug", "n");
+
+	    // Mock URL, method, and media type
+	    HttpMethod method = HttpMethod.POST;
+	    MediaType mediaType = MediaType.APPLICATION_JSON;
+
+	    // Request body set to null
+	    RequestDto requestDto = null;
+	    
+	    // Mock response for /biosdk-service/init
+	    String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response_error_400.json", UtilTest.class),
+	            StandardCharsets.UTF_8);
+
+	    mockWebServer.enqueue(new MockResponse()
+	            .setBody(mockResponse)
+	            .addHeader("Content-Type", "application/json")
+	            .setResponseCode(400));
+
+	    // Call the method under test and assert exception is thrown
+	    Exception exception = assertThrows(RestClientException.class, () -> {
+	        Util.restRequest(url, method, mediaType, requestDto, null, Object.class);
+	    });
+	    
+	    // Assert that the exception message matches the expected behavior
+	    assertEquals("rest call failed", exception.getMessage());
+
+	    // Cleanup
+	    System.clearProperty("mosip_biosdk_request_response_debug");
+	}
+	
+	@Test
+	void testDebugRequestResponseWrongURL() throws IOException {
+	    // Set environment variable for debugging (disabled)
+	    System.setProperty("mosip_biosdk_request_response_debug", "n");
+
+	    // Mock URL, method, and media type
+	    HttpMethod method = HttpMethod.POST;
+	    MediaType mediaType = MediaType.APPLICATION_JSON;
+
+	    // Request body set to null
+	    RequestDto requestDto = null;
+	    
+	    // Mock response for /biosdk-service/init
+	    String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response_error_404.json", UtilTest.class),
+	            StandardCharsets.UTF_8);
+
+	    mockWebServer.enqueue(new MockResponse()
+	            .setBody(mockResponse)
+	            .addHeader("Content-Type", "application/json")
+	            .setResponseCode(404));
+
+	    // Call the method under test and assert exception is thrown
+	    Exception exception = assertThrows(RestClientException.class, () -> {
+	        Util.restRequest(url + "/init", method, mediaType, requestDto, null, Object.class);
+	    });
+	    
+	    // Assert that the exception message matches the expected behavior
+	    assertEquals("rest call failed", exception.getMessage());
+
+	    // Cleanup
+	    System.clearProperty("mosip_biosdk_request_response_debug");
+	}
+	
 	private RequestDto generateNewRequestDto(Object body) {
 		RequestDto requestDto = new RequestDto();
 		requestDto.setVersion("1.0");

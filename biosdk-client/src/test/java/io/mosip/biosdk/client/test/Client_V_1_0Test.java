@@ -76,7 +76,7 @@ class Client_V_1_0Test {
 		initParams.put("param2", "value2");
 
 		// Mock response for /biosdk-service/init
-		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response.json", Client_V_1_0.class), StandardCharsets.UTF_8);
+		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class), StandardCharsets.UTF_8);
 		
 	    mockWebServer.enqueue(new MockResponse()
 	            .setBody(mockResponse)
@@ -104,7 +104,7 @@ class Client_V_1_0Test {
 		initParams.put("param2", "value2");
 
 		// Mock response for /biosdk-service/init
-		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response.json", Client_V_1_0.class), StandardCharsets.UTF_8);		
+		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class), StandardCharsets.UTF_8);		
 	    mockWebServer.enqueue(new MockResponse()
 	            .setBody(mockResponse)
 	            .addHeader("Content-Type", "application/json")
@@ -167,7 +167,7 @@ class Client_V_1_0Test {
 		initParams.put("param2", "value2");
 
 		// Mock response for /biosdk-service/init
-		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response.json", Client_V_1_0.class), StandardCharsets.UTF_8);		
+		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class), StandardCharsets.UTF_8);		
 	    mockWebServer.enqueue(new MockResponse()
 	            .setBody(mockResponse)
 	            .addHeader("Content-Type", "application/json")
@@ -229,7 +229,7 @@ class Client_V_1_0Test {
 		initParams.put("param2", "value2");
 
 		// Mock response for /biosdk-service/init
-		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response.json", Client_V_1_0.class), StandardCharsets.UTF_8);		
+		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class), StandardCharsets.UTF_8);		
 	    mockWebServer.enqueue(new MockResponse()
 	            .setBody(mockResponse)
 	            .addHeader("Content-Type", "application/json")
@@ -291,7 +291,7 @@ class Client_V_1_0Test {
 		initParams.put("param2", "value2");
 
 		// Mock response for /biosdk-service/init
-		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response.json", Client_V_1_0.class), StandardCharsets.UTF_8);		
+		String mockResponse = new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class), StandardCharsets.UTF_8);		
 	    mockWebServer.enqueue(new MockResponse()
 	            .setBody(mockResponse)
 	            .addHeader("Content-Type", "application/json")
