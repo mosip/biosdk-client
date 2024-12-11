@@ -40,12 +40,6 @@ public class Util {
 		REST_TEMPLATE.getMessageConverters().add(MESSAGE_CONVERTER);
 	}
 
-	/**
-	 * Flag indicating whether to log request and response details for debugging
-	 * purposes. Set as environment variable 'mosip_biosdk_request_response_debug'.
-	 */
-	public static final String DEBUG_REQUEST_RESPONSE = System.getenv("mosip_biosdk_request_response_debug");
-
 	private static Logger utilLogger = LoggerConfig.logConfig(Util.class);
 
 	private Util() {
@@ -83,7 +77,7 @@ public class Util {
 				request = new HttpEntity<>(headers);
 			}
 
-			if (DEBUG_REQUEST_RESPONSE != null && DEBUG_REQUEST_RESPONSE.equalsIgnoreCase("y")) {
+			if (getDebugRequestResponse() != null && getDebugRequestResponse().equalsIgnoreCase("y")) {
 				Gson gson = new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
 				utilLogger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "Request: ", gson.toJson(request.getBody()));
 			}
@@ -92,7 +86,7 @@ public class Util {
 			Object responseBodyObject = response.getBody();
 			String responseBody = responseBodyObject != null ? responseBodyObject.toString() : "";
 
-			if (DEBUG_REQUEST_RESPONSE != null && DEBUG_REQUEST_RESPONSE.equalsIgnoreCase("y")) {
+			if (getDebugRequestResponse() != null && getDebugRequestResponse().equalsIgnoreCase("y")) {
 				utilLogger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "Response: ", responseBody);
 			}
 		} catch (RestClientException ex) {
@@ -119,5 +113,16 @@ public class Util {
 	 */
 	public static String base64Encode(String data) {
 		return Base64.getEncoder().encodeToString(data.getBytes());
+	}
+
+	/**
+	 * Flag indicating whether to log request and response details for debugging
+	 * purposes. Set as environment variable 'mosip_biosdk_request_response_debug'.
+	 */
+	public static String getDebugRequestResponse() {
+		if (System.getProperty("mosip_biosdk_request_response_debug") != null)
+			return System.getProperty("mosip_biosdk_request_response_debug");
+
+		return System.getenv("mosip_biosdk_request_response_debug");
 	}
 }
