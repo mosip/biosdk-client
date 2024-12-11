@@ -38,12 +38,13 @@ import okhttp3.mockwebserver.MockWebServer;
 class Client_V_1_0Test {
 	private static MockWebServer mockWebServer;
 
-	private Gson gson;
-
 	@BeforeAll
 	public static void startWebServerConnection() throws IOException {
 		mockWebServer = new MockWebServer();
 		mockWebServer.start(InetAddress.getLoopbackAddress(), 9099);
+		
+		// Set environment variable for sdk url
+		System.setProperty("mosip_biosdk_service", "http://localhost:9099/biosdk-service");
 	}
 
 	@AfterAll
@@ -58,7 +59,6 @@ class Client_V_1_0Test {
 	@BeforeEach
 	public void setup() {
 		MockitoAnnotations.openMocks(this); // Initialize mocks
-		gson = new GsonBuilder().serializeNulls().create();
 	}
 
 	@Test

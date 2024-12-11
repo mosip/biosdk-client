@@ -2,10 +2,6 @@ package io.mosip.biosdk.client.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -20,12 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.Gson;
@@ -56,6 +50,9 @@ class UtilTest {
 	public static void startWebServerConnection() throws IOException {
 		mockWebServer = new MockWebServer();
 		mockWebServer.start(InetAddress.getLoopbackAddress(), 9099);
+		
+		// Set environment variable for sdk url
+		System.setProperty("mosip_biosdk_service", "http://localhost:9099/biosdk-service");
 	}
 
 	@AfterAll
