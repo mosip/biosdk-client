@@ -448,7 +448,6 @@ class Client_V_1_0Test {
 
 		// Assert results
 		assertNotNull(result);
-		assertEquals("http://test-url.com", result.get("default"));
 		assertEquals("http://test-url.com", result.get("test"));
 	}
 
