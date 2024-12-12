@@ -37,9 +37,6 @@
 		<!-- git -->
 		<git.commit.id.plugin.version>3.0.1</git.commit.id.plugin.version>
 
-		<!-- git -->
-		<junit.quickcheck.version>0.3</junit.quickcheck.version>
-
 		<!-- Kernel -->
 		<kernel.bom.version>1.2.1-SNAPSHOT</kernel.bom.version>
 		<kernel.core.version>1.2.1-SNAPSHOT</kernel.core.version>
@@ -179,12 +176,6 @@
 		<dependency>
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>mockwebserver</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.contrib</groupId>
-			<artifactId>junit-quickcheck</artifactId>
-			<version>${junit.quickcheck.version}</version>
 			<scope>test</scope>
 		</dependency>
 

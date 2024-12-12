@@ -554,30 +554,6 @@ class Client_V_1_0Test {
     }
 
     @Test
-    void testGetDefaultSdkServiceUrlFromEnv_WithEnvironmentVariable() throws Exception {
-        Client_V_1_0 client = new Client_V_1_0();
-
-        // Set the system property to null (to ensure it is not used)
-        clearSystemProperty("mosip_biosdk_service");
-
-        // Set environment variable for MOSIP_BIOSDK_SERVICE
-        setEnvVariable("mosip_biosdk_service", "http://localhost:8080");
-
-        // Use reflection to access the private method
-        Method method = Client_V_1_0.class.getDeclaredMethod("getDefaultSdkServiceUrlFromEnv");
-        method.setAccessible(true);
-
-        // Invoke the private method
-        String result = (String) method.invoke(client);
-
-        // Assert that the environment variable value is returned
-        assertEquals("http://localhost:8080", result);
-
-        // Clear the environment variable after the test
-        clearSystemProperty("mosip_biosdk_service");
-    }
-
-    @Test
     void testGetDefaultSdkServiceUrlFromEnv_NoValue() throws Exception {
         Client_V_1_0 client = new Client_V_1_0();
 
@@ -603,15 +579,5 @@ class Client_V_1_0Test {
     // Helper method to clear system property after the test
     private void clearSystemProperty(String key) {
         System.clearProperty(key);
-    }
-    
-    // Helper method to set environment variable for testing
-    private void setEnvVariable(String key, String value) {
-        try {
-            // Set the environment variable using reflection (for testing purposes)
-            System.getenv().put(key, value);
-        } catch (Exception e) {
-            logger.error("Failed to set environment variable: {}", e);
-        }
     }
 }
