@@ -2,6 +2,7 @@ package io.mosip.biosdk.client.dto;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import io.mosip.kernel.biometrics.constant.BiometricType;
 import io.mosip.kernel.biometrics.entities.BiometricRecord;
@@ -40,4 +41,24 @@ public class CheckQualityRequestDto {
 	 * Additional flags or parameters for quality checking, if any.
 	 */
 	private Map<String, String> flags;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		CheckQualityRequestDto that = (CheckQualityRequestDto) o;
+		return Objects.equals(sample, that.sample) && Objects.equals(modalitiesToCheck, that.modalitiesToCheck)
+				&& Objects.equals(flags, that.flags);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(sample, modalitiesToCheck, flags);
+	}
+
+	public boolean canEqual(Object other) {
+		return other instanceof CheckQualityRequestDto;
+	}
 }

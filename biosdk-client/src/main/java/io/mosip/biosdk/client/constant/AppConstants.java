@@ -12,7 +12,7 @@ package io.mosip.biosdk.client.constant;
  * @since 1.0.0
  */
 public class AppConstants {
-	private AppConstants() {
+	public AppConstants() {
 		throw new IllegalStateException("AppConstants class");
 	}
 

@@ -2,6 +2,7 @@ package io.mosip.biosdk.client.dto;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import io.mosip.kernel.biometrics.constant.BiometricType;
 import io.mosip.kernel.biometrics.entities.BiometricRecord;
@@ -42,4 +43,24 @@ public class SegmentRequestDto {
 	 * Additional flags or parameters for segmentation.
 	 */
 	private Map<String, String> flags;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof SegmentRequestDto))
+			return false;
+		SegmentRequestDto that = (SegmentRequestDto) o;
+		return Objects.equals(sample, that.sample) && Objects.equals(modalitiesToSegment, that.modalitiesToSegment)
+				&& Objects.equals(flags, that.flags);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(sample, modalitiesToSegment, flags);
+	}
+
+	public boolean canEqual(Object other) {
+		return other instanceof SegmentRequestDto;
+	}
 }

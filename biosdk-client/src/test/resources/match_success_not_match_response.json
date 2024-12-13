@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "responsetime": "2024-12-10T20:28:50.990Z",
+  "response": {
+    "statusCode": 200,
+    "statusMessage": null,
+    "response": [
+      {
+        "galleryIndex": 0,
+        "decisions": {
+          "FACE": {
+            "match": "NOT_MATCHED",
+            "errors": [],
+            "analyticsInfo": {}
+          }
+        },
+        "analyticsInfo": {}
+      }
+    ]
+  },
+  "errors": []
+}
