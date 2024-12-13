@@ -1,6 +1,5 @@
 package io.mosip.biosdk.client.test;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -11,7 +10,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -40,7 +42,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 class UtilTest {
 	private static Logger logger = LoggerConfig.logConfig(UtilTest.class);
 
-	String url = "http://localhost:9098/biosdk-service/init"; //Orginal 9099
+	String url = "http://localhost:9099/biosdk-service/init";
 
 	private static MockWebServer mockWebServer;
 
@@ -55,10 +57,10 @@ class UtilTest {
 	@BeforeAll
 	public static void startWebServerConnection() throws IOException {
 		mockWebServer = new MockWebServer();
-		mockWebServer.start(InetAddress.getLoopbackAddress(), 9098);
+		mockWebServer.start(InetAddress.getLoopbackAddress(), 9099);
 
 		// Set environment variable for sdk url
-		System.setProperty("mosip_biosdk_service", "http://localhost:9098/biosdk-service");
+		System.setProperty("mosip_biosdk_service", "http://localhost:9099/biosdk-service");
 	}
 
 	@AfterAll
@@ -84,7 +86,7 @@ class UtilTest {
 
 		InitRequestDto initRequestDto = new InitRequestDto();
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
 
 		initRequestDto.setInitParams(initParams); // Set initialization params
 
@@ -127,7 +129,7 @@ class UtilTest {
 
 		InitRequestDto initRequestDto = new InitRequestDto();
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
 		
 		initRequestDto.setInitParams(initParams); // Set initialization params
 		RequestDto requestDto = generateNewRequestDto(initRequestDto);
@@ -179,7 +181,7 @@ class UtilTest {
 
 		InitRequestDto initRequestDto = new InitRequestDto();
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
 
 		initRequestDto.setInitParams(initParams); // Set initialization params
 		RequestDto requestDto = generateNewRequestDto(initRequestDto);
@@ -225,7 +227,7 @@ class UtilTest {
 
 		InitRequestDto initRequestDto = new InitRequestDto();
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
 
 		initRequestDto.setInitParams(initParams); // Set initialization params
 		RequestDto requestDto = generateNewRequestDto(initRequestDto);
@@ -285,7 +287,7 @@ class UtilTest {
 		});
 
 		// Assert that the exception message matches the expected behavior
-		Assertions.assertTrue(exception.getMessage().contains("rest call failed"));
+		assertEquals("rest call failed", exception.getMessage());
 
 		// Cleanup
 		System.clearProperty("mosip_biosdk_request_response_debug");
@@ -328,7 +330,7 @@ class UtilTest {
 		});
 
 		// Assert that the exception message matches the expected behavior
-		Assertions.assertTrue(exception.getMessage().contains("rest call failed"));
+		assertEquals("rest call failed", exception.getMessage());
 
 		// Cleanup
 		System.clearProperty("mosip_biosdk_request_response_debug");
@@ -336,13 +338,8 @@ class UtilTest {
 
 	private RequestDto generateNewRequestDto(Object body) {
 		RequestDto requestDto = new RequestDto();
-		try {
-			String jsonBody = Util.getObjectMapper().writeValueAsString(body);
-			requestDto.setVersion("1.0");
-			requestDto.setRequest(Util.base64Encode(jsonBody));
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to serialize request body", e);
-		}
+		requestDto.setVersion("1.0");
+		requestDto.setRequest(Util.base64Encode(gson.toJson(body)));
 		return requestDto;
 	}
 }
