@@ -1,0 +1,6 @@
+{
+  "timestamp": "2024-12-11T07:34:58.897+00:00",
+  "status": 400,
+  "error": "Bad Request",
+  "path": "/biosdk-service/init"
+}

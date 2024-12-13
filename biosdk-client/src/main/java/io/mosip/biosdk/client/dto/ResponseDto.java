@@ -1,6 +1,7 @@
 package io.mosip.biosdk.client.dto;
 
 import java.util.List;
+import java.util.Objects;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,4 +45,24 @@ public class ResponseDto<T> {
 	 * List of errors encountered during the service operation.
 	 */
 	private List<ErrorDto> errors;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof ResponseDto))
+			return false;
+		ResponseDto<?> that = (ResponseDto<?>) o;
+		return Objects.equals(version, that.version) && Objects.equals(responsetime, that.responsetime)
+				&& Objects.equals(response, that.response) && Objects.equals(errors, that.errors);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(version, responsetime, response, errors);
+	}
+
+	public boolean canEqual(Object other) {
+		return other instanceof ResponseDto;
+	}
 }

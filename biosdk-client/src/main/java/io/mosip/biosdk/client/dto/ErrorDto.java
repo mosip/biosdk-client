@@ -1,5 +1,7 @@
 package io.mosip.biosdk.client.dto;
 
+import java.util.Objects;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,4 +33,23 @@ public class ErrorDto {
 	 * Detailed message providing information about the error.
 	 */
 	private String message;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		ErrorDto errorDto = (ErrorDto) o;
+		return Objects.equals(code, errorDto.code) && Objects.equals(message, errorDto.message);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(code, message);
+	}
+
+	public boolean canEqual(Object other) {
+		return other instanceof ErrorDto;
+	}
 }

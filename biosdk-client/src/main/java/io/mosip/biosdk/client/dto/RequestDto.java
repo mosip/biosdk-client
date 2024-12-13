@@ -1,5 +1,7 @@
 package io.mosip.biosdk.client.dto;
 
+import java.util.Objects;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -19,14 +21,32 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class RequestDto {
-
 	/**
 	 * The version of the request format.
 	 */
 	private String version;
 
 	/**
-	 * The serialized request data in JSON or another format.
+	 * The serialized request data in JSON and base64 encoded.
 	 */
 	private String request;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof RequestDto))
+			return false;
+		RequestDto that = (RequestDto) o;
+		return Objects.equals(version, that.version) && Objects.equals(request, that.request);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(version, request);
+	}
+
+	public boolean canEqual(Object other) {
+		return other instanceof RequestDto;
+	}
 }

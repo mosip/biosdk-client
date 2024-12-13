@@ -1,0 +1,11 @@
+{
+  "version": "string",
+  "responsetime": "2024-12-10T20:41:43.903Z",
+  "response": "",
+  "errors": [
+    {
+      "code": "BIO_SDK_001",
+      "message": "No Bio SDK service provider implementations found for given version"
+    }
+  ]
+}
