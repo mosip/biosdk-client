@@ -169,7 +169,10 @@ public class Client_V_1_0 implements IBioApiV2 {
 		String organization = sdkInfo.getProductOwner() == null ? null : sdkInfo.getProductOwner().getOrganization();
 		String type = sdkInfo.getProductOwner() == null ? null : sdkInfo.getProductOwner().getType();
 		SDKInfo aggregatedSdkInfo = new SDKInfo(sdkInfo.getApiVersion(), sdkInfo.getSdkVersion(), organization, type);
-		sdkInfos.forEach(info -> addOtherSdkInfoDetails(info, aggregatedSdkInfo));
+		sdkInfos.forEach(info -> {
+		    //logger.debug("Processing SDKInfo: {}", info);
+		    addOtherSdkInfoDetails(info, aggregatedSdkInfo);
+		});
 		return aggregatedSdkInfo;
 	}
 
@@ -329,6 +332,9 @@ public class Client_V_1_0 implements IBioApiV2 {
 	 * @return The default SDK service URL fetched from the environment variables.
 	 */
 	private String getDefaultSdkServiceUrlFromEnv() {
+		if (System.getProperty(MOSIP_BIOSDK_SERVICE) != null)
+			return System.getProperty(MOSIP_BIOSDK_SERVICE);
+
 		return System.getenv(MOSIP_BIOSDK_SERVICE);
 	}
 

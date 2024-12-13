@@ -2,6 +2,7 @@ package io.mosip.biosdk.client.dto;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import io.mosip.kernel.biometrics.constant.BiometricType;
 import io.mosip.kernel.biometrics.entities.BiometricRecord;
@@ -40,4 +41,27 @@ public class ExtractTemplateRequestDto {
 	 * Optional flags providing additional parameters for template extraction.
 	 */
 	private Map<String, String> flags;
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof ExtractTemplateRequestDto))
+			return false;
+
+		ExtractTemplateRequestDto other = (ExtractTemplateRequestDto) obj;
+
+		return Objects.equals(sample, other.sample) &&  
+				Objects.equals(modalitiesToExtract, other.modalitiesToExtract) &&  
+				Objects.equals(flags, other.flags); 
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(sample, modalitiesToExtract, flags); 
+	}
+
+	public boolean canEqual(Object other) {
+		return other instanceof ExtractTemplateRequestDto;
+	}
 }
