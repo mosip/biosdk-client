@@ -6,9 +6,10 @@ The BioSDK-Client library provides an implementation of [IBioAPIV2](https://gith
 
 It is used by:
 
-* [authentication-internal-service](https://github.com/mosip/id-authentication/tree/master/authentication/authentication-internal-service)
-* [authentication-service](https://github.com/mosip/id-authentication/tree/master/authentication/authentication-service)
-* [id-repository-identity-service](https://github.com/mosip/id-repository/tree/master/id-repository)
+	* authentication-internal-service
+	* authentication-kyc-service
+	* authentication-service
+	* idrepo-bioextractor-service
 
 ---
 
