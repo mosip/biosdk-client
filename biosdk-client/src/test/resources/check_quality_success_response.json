@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "responsetime": "2024-12-10T20:49:11.688Z",
+  "response": {
+    "statusCode": 200,
+    "statusMessage": "OK",
+    "response": {
+      "scores": {
+        "FACE": {
+          "score": 100,
+          "errors": [],
+          "analyticsInfo": {}
+        }
+      },
+      "analyticsInfo": {}
+    }
+  },
+  "errors": []
+}
