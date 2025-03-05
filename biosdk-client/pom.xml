@@ -411,18 +411,6 @@
 
 	<repositories>
 		<repository>
-			<id>spring-releases</id>
-			<url>https://repo.spring.io/release</url>
-		</repository>
-		<repository>
-			<id>spring-milestones</id>
-			<url>https://repo.spring.io/milestone</url>
-		</repository>
-		<repository>
-			<id>spring-snapshots</id>
-			<url>https://repo.spring.io/snapshot</url>
-		</repository>
-		<repository>
 			<id>ossrh</id>
 			<name>CentralRepository</name>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
