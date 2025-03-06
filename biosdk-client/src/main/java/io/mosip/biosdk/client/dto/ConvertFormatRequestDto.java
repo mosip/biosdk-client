@@ -2,6 +2,7 @@ package io.mosip.biosdk.client.dto;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import io.mosip.kernel.biometrics.constant.BiometricType;
 import io.mosip.kernel.biometrics.entities.BiometricRecord;
@@ -55,4 +56,26 @@ public class ConvertFormatRequestDto {
 	 * List of biometric modalities to be converted.
 	 */
 	private List<BiometricType> modalitiesToConvert;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		ConvertFormatRequestDto that = (ConvertFormatRequestDto) o;
+		return Objects.equals(sample, that.sample) && Objects.equals(sourceFormat, that.sourceFormat)
+				&& Objects.equals(targetFormat, that.targetFormat) && Objects.equals(sourceParams, that.sourceParams)
+				&& Objects.equals(targetParams, that.targetParams)
+				&& Objects.equals(modalitiesToConvert, that.modalitiesToConvert);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(sample, sourceFormat, targetFormat, sourceParams, targetParams, modalitiesToConvert);
+	}
+
+	public boolean canEqual(Object other) {
+		return other instanceof ConvertFormatRequestDto;
+	}
 }
