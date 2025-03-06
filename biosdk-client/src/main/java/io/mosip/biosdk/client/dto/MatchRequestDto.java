@@ -1,7 +1,9 @@
 package io.mosip.biosdk.client.dto;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import io.mosip.kernel.biometrics.constant.BiometricType;
 import io.mosip.kernel.biometrics.entities.BiometricRecord;
@@ -47,4 +49,27 @@ public class MatchRequestDto {
 	 * Additional flags or parameters for configuring the matching process.
 	 */
 	private Map<String, String> flags;
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof MatchRequestDto))
+			return false;
+
+		MatchRequestDto other = (MatchRequestDto) obj;
+		return Objects.equals(sample, other.sample) && Arrays.equals(gallery, other.gallery)
+				&& Objects.equals(modalitiesToMatch, other.modalitiesToMatch) && Objects.equals(flags, other.flags);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = Objects.hash(sample, modalitiesToMatch, flags); // Generate a hash code based on the fields
+		result = 31 * result + Arrays.hashCode(gallery); // Incorporate gallery array into the hash code
+		return result;
+	}
+
+	public boolean canEqual(Object other) {
+		return other instanceof MatchRequestDto; // Check if the object is of the same class
+	}
 }

@@ -1,0 +1,41 @@
+{
+  "version": "1.0",
+  "responsetime": "2024-12-10T19:56:05.438Z",
+  "response": {
+    "apiVersion": "0.9",
+    "sdkVersion": "sample1",
+    "supportedModalities": [
+      "FINGER",
+      "FACE",
+      "IRIS"
+    ],
+    "supportedMethods": {
+      "QUALITY_CHECK": [
+        "FINGER",
+        "FACE",
+        "IRIS"
+      ],
+      "EXTRACT": [
+        "FINGER",
+        "FACE",
+        "IRIS"
+      ],
+      "CONVERT_FORMAT": [
+        "FINGER",
+        "FACE",
+        "IRIS"
+      ],
+      "MATCH": [
+        "FINGER",
+        "FACE",
+        "IRIS"
+      ]
+    },
+    "otherInfo": {},
+    "productOwner": {
+      "organization": "sample2",
+      "type": "sample3"
+    }
+  },
+  "errors": []
+}
