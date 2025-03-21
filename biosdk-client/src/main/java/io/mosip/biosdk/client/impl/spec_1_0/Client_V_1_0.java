@@ -634,6 +634,7 @@ public class Client_V_1_0 implements IBioApiV2 {
 	 * @since 1.0.0
 	 * @deprecated Since 1.2.0.1, for removal in a future release.
 	 */
+	@SuppressWarnings({ "java:S1313" })
 	@Deprecated(since = "1.2.0.1", forRemoval = true)
 	@Override
 	public BiometricRecord convertFormat(BiometricRecord sample, String sourceFormat, String targetFormat,
