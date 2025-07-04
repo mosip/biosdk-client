@@ -59,6 +59,8 @@ public class Client_V_1_0 implements IBioApiV2 {
 
 	private static final String FORMAT_URL_PREFIX = "format.url.";
 
+	private static final String PARAMETER_PREFIX = "config.parameter.";
+
 	private static final String MOSIP_BIOSDK_SERVICE = "mosip_biosdk_service";
 
 	private static Logger logger = LoggerConfig.logConfig(Client_V_1_0.class);
@@ -74,11 +76,25 @@ public class Client_V_1_0 implements IBioApiV2 {
 	@Override
 	public SDKInfo init(Map<String, String> initParams) {
 		sdkUrlsMap = getSdkUrls(initParams);
+		setSDKParameters(initParams);
 		List<SDKInfo> sdkInfos = sdkUrlsMap.values()
 											.stream()
 											.map(sdkUrl -> initForSdkUrl(initParams, sdkUrl))
 											.collect(Collectors.toList());
 		return getAggregatedSdkInfo(sdkInfos);
+	}
+
+	private void setSDKParameters(Map<String, String> initParams) {
+		Map<String, String> parametersMap = new HashMap<>(initParams.entrySet()
+				.stream()
+				.filter(entry -> entry.getKey().contains(PARAMETER_PREFIX))
+				.collect(Collectors.toMap(entry -> entry.getKey()
+						.substring(PARAMETER_PREFIX.length()), Entry::getValue)));
+
+		for(Map.Entry<String, String> map : parametersMap.entrySet()) {
+			System.setProperty(map.getKey(), map.getValue());
+			logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, map.getKey() ,  map.getValue());
+		}
 	}
 
 	private SDKInfo getAggregatedSdkInfo(List<SDKInfo> sdkInfos) {
