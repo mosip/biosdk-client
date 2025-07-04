@@ -81,6 +81,8 @@ public class Client_V_1_0 implements IBioApiV2 {
 
 	private static final String FORMAT_URL_PREFIX = "format.url.";
 
+	private static final String PARAMETER_PREFIX = "config.parameter.";
+
 	private static final String MOSIP_BIOSDK_SERVICE = "mosip_biosdk_service";
 
 	private static final String VERSION = "1.0";
@@ -120,23 +122,25 @@ public class Client_V_1_0 implements IBioApiV2 {
 	@Override
 	public SDKInfo init(Map<String, String> initParams) {
 		sdkUrlsMap = getSdkUrls(initParams);
+		setSDKParameters(initParams);
 		List<SDKInfo> sdkInfos = sdkUrlsMap.values().stream().map(sdkUrl -> initForSdkUrl(initParams, sdkUrl)).toList();
 		return getAggregatedSdkInfo(sdkInfos);
 	}
 
-	/**
-	 * Aggregates information from a list of SDKInfo objects into a single SDKInfo
-	 * object.
-	 * 
-	 * If the provided list is empty, returns null. If the list contains a single
-	 * element, returns that element directly. Otherwise, iterates through the list
-	 * and merges information from each element to create a new aggregated SDKInfo
-	 * object.
-	 *
-	 * @param sdkInfos The list of SDKInfo objects to aggregate.
-	 * @return An SDKInfo object containing aggregated information, or null if the
-	 *         list is empty.
-	 */
+
+	private void setSDKParameters(Map<String, String> initParams) {
+		Map<String, String> parametersMap = new HashMap<>(initParams.entrySet()
+				.stream()
+				.filter(entry -> entry.getKey().contains(PARAMETER_PREFIX))
+				.collect(Collectors.toMap(entry -> entry.getKey()
+						.substring(PARAMETER_PREFIX.length()), Entry::getValue)));
+
+		for(Map.Entry<String, String> map : parametersMap.entrySet()) {
+			System.setProperty(map.getKey(), map.getValue());
+			logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, map.getKey() ,  map.getValue());
+		}
+	}
+
 	private SDKInfo getAggregatedSdkInfo(List<SDKInfo> sdkInfos) {
 		SDKInfo sdkInfo;
 		if (!sdkInfos.isEmpty()) {
