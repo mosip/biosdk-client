@@ -58,9 +58,10 @@ public class Util {
 
 	private static RestTemplate REST_TEMPLATE = null;
 
-	private static final String MAX_CONN_PER_ROUTE = "mosip_biosdk_max_conn_per_host";
-    private static final String MAX_TOT_CONN = "mosip_biosdk_max_total_conn";
-    private static final String SSL_BYPASS = "mosip_biosdk_ssl_bypass";
+	private static final String debugRequestResponse = System.getenv("mosip_biosdk_request_response_debug");
+    private static final String MAX_CONN_PER_ROUTE = "restTemplate-max-connection-per-route";
+    private static final String MAX_TOT_CONN = "restTemplate-total-max-connections";
+    private static final String SSL_BYPASS = "auth-adapter-ssl-bypass";
     private static boolean sslBypass = true;
 	private static Logger utilLogger = LoggerConfig.logConfig(Util.class);
 
