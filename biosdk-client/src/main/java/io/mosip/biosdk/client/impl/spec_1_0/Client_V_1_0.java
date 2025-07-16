@@ -3,7 +3,6 @@ package io.mosip.biosdk.client.impl.spec_1_0;
 import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_IDTYPE;
 import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_SESSIONID;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,17 +11,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import io.mosip.biosdk.client.utils.*;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-
 import io.mosip.biosdk.client.config.LoggerConfig;
 import io.mosip.biosdk.client.constant.ResponseStatus;
 import io.mosip.biosdk.client.dto.CheckQualityRequestDto;
@@ -33,8 +30,10 @@ import io.mosip.biosdk.client.dto.InitRequestDto;
 import io.mosip.biosdk.client.dto.MatchRequestDto;
 import io.mosip.biosdk.client.dto.RequestDto;
 import io.mosip.biosdk.client.dto.SegmentRequestDto;
+
 import io.mosip.biosdk.client.exception.BioSdkClientException;
 import io.mosip.biosdk.client.utils.Util;
+
 import io.mosip.kernel.biometrics.constant.BiometricType;
 import io.mosip.kernel.biometrics.entities.BiometricRecord;
 import io.mosip.kernel.biometrics.model.MatchDecision;
@@ -97,6 +96,8 @@ public class Client_V_1_0 implements IBioApiV2 {
 	private Gson gson;
 
 	private Type errorDtoListType;
+
+	TypeReference<List<ErrorDto>> errorDtoListTypeRef = new TypeReference<List<ErrorDto>>(){};
 
 	private Map<String, String> sdkUrlsMap;
 
@@ -242,18 +243,17 @@ public class Client_V_1_0 implements IBioApiV2 {
 				JSONParser parser = new JSONParser();
 				JSONObject js = (JSONObject) parser.parse(responseBody);
 
-				/* Error handler */
-				errorHandler(js.get(TAG_ERRORS) != null ? gson.fromJson(js.get(TAG_ERRORS).toString(), errorDtoListType)
-						: null);
+            /* Error handler */
+            errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-				sdkInfo = gson.fromJson(js.get(TAG_RESPONSE).toString(), SDKInfo.class);
-			} else
-				throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR + "", "Response is null");
-		} catch (Exception e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, TAG_HTTP_URL, e);
-			throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR + "", e.getLocalizedMessage(), e);
-		}
-		return sdkInfo;
+			sdkInfo = Util.getObjectMapper().readValue(js.get("response").toString(), new TypeReference<SDKInfo>() {});
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return sdkInfo;
 	}
 
 	/**
@@ -386,14 +386,12 @@ public class Client_V_1_0 implements IBioApiV2 {
 			JSONObject responseJson = (JSONObject) ((JSONObject) js.get(TAG_RESPONSE)).get(TAG_RESPONSE);
 
 			/* Error handler */
-			errorHandler(
-					js.get(TAG_ERRORS) != null ? gson.fromJson(js.get(TAG_ERRORS).toString(), errorDtoListType) : null);
+			errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-			qualityCheck = gson.fromJson(responseJson.toString(), QualityCheck.class);
-		} catch (Exception e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "checkQuality", e);
-			throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "", e.getLocalizedMessage(),
-					e);
+			qualityCheck = Util.getObjectMapper().readValue(responseJson.toString(), new TypeReference<QualityCheck>() {});
+		} catch (ParseException | JsonProcessingException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		response.setResponse(qualityCheck);
 		return response;
@@ -443,25 +441,25 @@ public class Client_V_1_0 implements IBioApiV2 {
 			JSONObject js = (JSONObject) parser.parse(responseBody);
 
 			/* Error handler */
-			errorHandler(
-					js.get(TAG_ERRORS) != null ? gson.fromJson(js.get(TAG_ERRORS).toString(), errorDtoListType) : null);
+			errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
 			JSONObject jsonResponse = (JSONObject) parser.parse(js.get(TAG_RESPONSE).toString());
 			response.setStatusCode(
 					jsonResponse.get(TAG_STATUS_CODE) != null ? ((Long) jsonResponse.get(TAG_STATUS_CODE)).intValue()
 							: null);
 			response.setStatusMessage(
-					jsonResponse.get(TAG_STATUS_MESSAGE) != null ? jsonResponse.get(TAG_STATUS_MESSAGE).toString()
-							: "");
-			response.setResponse(gson.fromJson(
-					jsonResponse.get(TAG_RESPONSE) != null ? jsonResponse.get(TAG_RESPONSE).toString() : null,
-					MatchDecision[].class));
-		} catch (Exception e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "match", e);
-			throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "", e.getLocalizedMessage(),
-					e);
-		}
-		return response;
+				jsonResponse.get("statusMessage") != null ? jsonResponse.get("statusMessage").toString() : ""
+			);
+			response.setResponse(
+					jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), new TypeReference<MatchDecision[]>() {}) : null
+			);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return response;
 	}
 
 	/**
@@ -500,12 +498,13 @@ public class Client_V_1_0 implements IBioApiV2 {
 						TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
 			}
 			convertAndSetResponseObject(response, responseEntity);
-		} catch (Exception e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "extractTemplate", e);
-			throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "", e.getLocalizedMessage(),
-					e);
-		}
-		return response;
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return response;
 	}
 
 	/**
@@ -577,37 +576,20 @@ public class Client_V_1_0 implements IBioApiV2 {
 						TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
 			}
 			convertAndSetResponseObject(response, responseEntity);
-		} catch (Exception e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "segment", e);
-			throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "", e.getLocalizedMessage(),
-					e);
+		} catch (ParseException | JsonProcessingException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		return response;
 	}
 
-	/**
-	 * Converts the response entity into a structured Response object containing a
-	 * BiometricRecord, handling any parsing errors and setting appropriate response
-	 * properties.
-	 *
-	 * @param response       Response object to be populated with the converted
-	 *                       BiometricRecord.
-	 * @param responseEntity ResponseEntity object received from the SDK service API
-	 *                       call.
-	 * @throws ParseException        If there is an error parsing the response body.
-	 * @throws BioSdkClientException If there is an error handling the response or
-	 *                               converting it to BiometricRecord.
-	 */
-	private void convertAndSetResponseObject(Response<BiometricRecord> response, ResponseEntity<?> responseEntity)
-			throws ParseException {
-		Object responseBodyObject = responseEntity.getBody();
-		String responseBody = responseBodyObject != null ? responseBodyObject.toString() : "";
+	private void convertAndSetResponseObject(Response<BiometricRecord> response, ResponseEntity<?> responseEntity) throws ParseException, JsonProcessingException {
+		String responseBody = responseEntity.getBody().toString();
 		JSONParser parser = new JSONParser();
 		JSONObject js = (JSONObject) parser.parse(responseBody);
 
 		/* Error handler */
-		errorHandler(
-				js.get(TAG_ERRORS) != null ? gson.fromJson(js.get(TAG_ERRORS).toString(), errorDtoListType) : null);
+		errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
 		JSONObject jsonResponse = (JSONObject) parser.parse(js.get(TAG_RESPONSE).toString());
 		response.setStatusCode(
@@ -616,32 +598,10 @@ public class Client_V_1_0 implements IBioApiV2 {
 		response.setStatusMessage(
 				jsonResponse.get(TAG_STATUS_MESSAGE) != null ? jsonResponse.get(TAG_STATUS_MESSAGE).toString() : "");
 		response.setResponse(
-				gson.fromJson(jsonResponse.get(TAG_RESPONSE) != null ? jsonResponse.get(TAG_RESPONSE).toString() : null,
-						BiometricRecord.class));
+				jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), new TypeReference<BiometricRecord>() {}) : null
+		);
 	}
 
-	/**
-	 * Converts the format of a biometric record from the source format to the
-	 * target format using the specified parameters and modalities for conversion.
-	 * <p>
-	 * Note: This method is deprecated and will be removed in future versions.
-	 *
-	 * @param sample              The biometric record to be converted.
-	 * @param sourceFormat        The source format of the biometric record.
-	 * @param targetFormat        The target format to which the biometric record
-	 *                            should be converted.
-	 * @param sourceParams        Optional parameters specific to the source format.
-	 * @param targetParams        Optional parameters specific to the target format.
-	 * @param modalitiesToConvert List of biometric modalities to include in the
-	 *                            conversion process.
-	 * @return The converted biometric record in the target format.
-	 * @throws BioSdkClientException If an error occurs during the format conversion
-	 *                               operation.
-	 * @since 1.0.0
-	 * @deprecated Since 1.2.0.1, for removal in a future release.
-	 */
-	@SuppressWarnings({ "java:S1313" })
-	@Deprecated(since = "1.2.0.1", forRemoval = true)
 	@Override
 	public BiometricRecord convertFormat(BiometricRecord sample, String sourceFormat, String targetFormat,
 			Map<String, String> sourceParams, Map<String, String> targetParams,
@@ -673,14 +633,12 @@ public class Client_V_1_0 implements IBioApiV2 {
 			JSONObject js = (JSONObject) parser.parse(responseBody);
 
 			/* Error handler */
-			errorHandler(
-					js.get(TAG_ERRORS) != null ? gson.fromJson(js.get(TAG_ERRORS).toString(), errorDtoListType) : null);
+			errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-			resBiometricRecord = gson.fromJson(js.get(TAG_RESPONSE).toString(), BiometricRecord.class);
-		} catch (Exception e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "convertFormat", e);
-			throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "", e.getLocalizedMessage(),
-					e);
+			resBiometricRecord = Util.getObjectMapper().readValue(js.get("response").toString(), new TypeReference<BiometricRecord>() {});
+		} catch (ParseException | JsonProcessingException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		return resBiometricRecord;
 	}
@@ -734,66 +692,40 @@ public class Client_V_1_0 implements IBioApiV2 {
 				throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "",
 						TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
 			}
-			Object responseBodyObject = responseEntity.getBody();
-			String responseBody = responseBodyObject != null ? responseBodyObject.toString() : "";
-			convertAndSetResponseObject(response, responseBody, BiometricRecord.class);
-		} catch (Exception e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "convertFormatV2", e);
-			throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "", e.getLocalizedMessage(),
-					e);
-		}
-		return response;
+			String responseBody = responseEntity.getBody().toString();
+			convertAndSetResponseObject(response, responseBody, new TypeReference<BiometricRecord>() {});
+		} catch (ParseException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+            return response;
 	}
 
-	/**
-	 * Parses the JSON response body into a structured format and sets the
-	 * corresponding fields in the provided {@link Response} object.
-	 *
-	 * @param response     The {@link Response} object to set with parsed data.
-	 * @param responseBody The JSON response body received from the SDK service
-	 *                     endpoint.
-	 * @param clazz        The class type of the expected response object.
-	 * @param <T>          The generic type representing the response object.
-	 * @throws ParseException If an error occurs while parsing the JSON response
-	 *                        body.
-	 * @since 1.0.0
-	 */
-	private <T> void convertAndSetResponseObject(Response<T> response, String responseBody, Class<T> clazz)
-			throws ParseException {
+	private <T> void convertAndSetResponseObject(Response<T> response, String responseBody, TypeReference<T> type) throws ParseException, JsonProcessingException {
 		JSONParser parser = new JSONParser();
 		JSONObject js = (JSONObject) parser.parse(responseBody);
 
 		/* Error handler */
-		errorHandler(
-				js.get(TAG_ERRORS) != null ? gson.fromJson(js.get(TAG_ERRORS).toString(), errorDtoListType) : null);
-
-		/* Error handler */
-		errorHandler(
-				js.get(TAG_ERRORS) != null ? gson.fromJson(js.get(TAG_ERRORS).toString(), errorDtoListType) : null);
+		errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
 		JSONObject jsonResponse = (JSONObject) parser.parse(js.get(TAG_RESPONSE).toString());
 		response.setStatusCode(
 				jsonResponse.get(TAG_STATUS_CODE) != null ? ((Long) jsonResponse.get(TAG_STATUS_CODE)).intValue()
 						: null);
 		response.setStatusMessage(
-				jsonResponse.get(TAG_STATUS_MESSAGE) != null ? jsonResponse.get(TAG_STATUS_MESSAGE).toString() : "");
-		response.setResponse(gson.fromJson(
-				jsonResponse.get(TAG_RESPONSE) != null ? jsonResponse.get(TAG_RESPONSE).toString() : null, clazz));
+				jsonResponse.get("statusMessage") != null ? jsonResponse.get("statusMessage").toString() : ""
+		);
+		response.setResponse(
+				jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), type) : null
+		);
 	}
 
-	/**
-	 * Generates a new {@link RequestDto} object with the provided body, encoded as
-	 * a base64 JSON string.
-	 *
-	 * @param body The object to be serialized and encoded as the request body.
-	 * @return A new {@link RequestDto} instance configured with the serialized and
-	 *         encoded request body.
-	 * @since 1.0.0
-	 */
-	private RequestDto generateNewRequestDto(Object body) {
+	private RequestDto generateNewRequestDto(Object body) throws JsonProcessingException {
 		RequestDto requestDto = new RequestDto();
 		requestDto.setVersion(VERSION);
-		requestDto.setRequest(Util.base64Encode(gson.toJson(body)));
+		requestDto.setRequest(Util.base64Encode(Util.getObjectMapper().writeValueAsString(body)));
 		return requestDto;
 	}
 
