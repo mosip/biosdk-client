@@ -123,7 +123,7 @@ public class Client_V_1_0 implements IBioApiV2 {
 	@Override
 	public SDKInfo init(Map<String, String> initParams) {
 		sdkUrlsMap = getSdkUrls(initParams);
-		setSDKParameters(initParams);
+		setConfigParameters(initParams);
 		List<SDKInfo> sdkInfos = sdkUrlsMap.values()
 											.stream()
 											.map(sdkUrl -> initForSdkUrl(initParams, sdkUrl))
@@ -131,7 +131,7 @@ public class Client_V_1_0 implements IBioApiV2 {
 		return getAggregatedSdkInfo(sdkInfos);
 	}
 
-	private void setSDKParameters(Map<String, String> initParams) {
+	private void setConfigParameters(Map<String, String> initParams) {
 		Map<String, String> parametersMap = new HashMap<>(initParams.entrySet()
 				.stream()
 				.filter(entry -> entry.getKey().contains(PARAMETER_PREFIX))
