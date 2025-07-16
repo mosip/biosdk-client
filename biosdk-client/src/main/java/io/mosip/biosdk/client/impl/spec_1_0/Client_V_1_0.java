@@ -3,7 +3,6 @@ package io.mosip.biosdk.client.impl.spec_1_0;
 import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_IDTYPE;
 import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_SESSIONID;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,17 +11,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import io.mosip.biosdk.client.utils.*;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-
 import io.mosip.biosdk.client.config.LoggerConfig;
 import io.mosip.biosdk.client.dto.CheckQualityRequestDto;
 import io.mosip.biosdk.client.dto.ConvertFormatRequestDto;
@@ -32,7 +29,6 @@ import io.mosip.biosdk.client.dto.InitRequestDto;
 import io.mosip.biosdk.client.dto.MatchRequestDto;
 import io.mosip.biosdk.client.dto.RequestDto;
 import io.mosip.biosdk.client.dto.SegmentRequestDto;
-import io.mosip.biosdk.client.utils.Util;
 import io.mosip.kernel.biometrics.constant.BiometricType;
 import io.mosip.kernel.biometrics.entities.BiometricRecord;
 import io.mosip.kernel.biometrics.model.MatchDecision;
@@ -67,9 +63,7 @@ public class Client_V_1_0 implements IBioApiV2 {
 
 	private static final String VERSION = "1.0";
 
-	private Gson gson = new GsonBuilder().serializeNulls().create();
-
-	Type errorDtoListType = new TypeToken<List<ErrorDto>>(){}.getType();
+	TypeReference<List<ErrorDto>> errorDtoListTypeRef = new TypeReference<List<ErrorDto>>(){};
 
 	private Map<String, String> sdkUrlsMap;
 
@@ -154,14 +148,16 @@ public class Client_V_1_0 implements IBioApiV2 {
 			JSONObject js = (JSONObject) parser.parse(responseBody);
 
             /* Error handler */
-            errorHandler(js.get("errors") != null ? gson.fromJson(js.get("errors").toString(), errorDtoListType) : null);
+            errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-			sdkInfo = gson.fromJson(js.get("response").toString(), SDKInfo.class);
+			sdkInfo = Util.getObjectMapper().readValue(js.get("response").toString(), new TypeReference<SDKInfo>() {});
 		} catch (ParseException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		}
-		return sdkInfo;
+		} catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return sdkInfo;
 	}
 
 	private Map<String, String> getSdkUrls(Map<String, String> initParams) {
@@ -247,10 +243,10 @@ public class Client_V_1_0 implements IBioApiV2 {
 			JSONObject responseJson =(JSONObject)  ((JSONObject) js.get("response")).get("response");
 
 			/* Error handler */
-			errorHandler(js.get("errors") != null ? gson.fromJson(js.get("errors").toString(), errorDtoListType) : null);
+			errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-			qualityCheck = gson.fromJson(responseJson.toString(), QualityCheck.class);
-		} catch (ParseException e) {
+			qualityCheck = Util.getObjectMapper().readValue(responseJson.toString(), new TypeReference<QualityCheck>() {});
+		} catch (ParseException | JsonProcessingException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
@@ -282,7 +278,7 @@ public class Client_V_1_0 implements IBioApiV2 {
 			JSONObject js = (JSONObject) parser.parse(responseBody);
 
 			/* Error handler */
-			errorHandler(js.get("errors") != null ? gson.fromJson(js.get("errors").toString(), errorDtoListType) : null);
+			errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
 			JSONObject jsonResponse = (JSONObject) parser.parse(js.get("response").toString());
 			response.setStatusCode(
@@ -292,13 +288,15 @@ public class Client_V_1_0 implements IBioApiV2 {
 				jsonResponse.get("statusMessage") != null ? jsonResponse.get("statusMessage").toString() : ""
 			);
 			response.setResponse(
-				gson.fromJson(jsonResponse.get("response") != null ? jsonResponse.get("response").toString() : null, MatchDecision[].class)
+					jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), new TypeReference<MatchDecision[]>() {}) : null
 			);
 		} catch (ParseException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		}
-		return response;
+		} catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return response;
 	}
 
 	@Override
@@ -322,8 +320,10 @@ public class Client_V_1_0 implements IBioApiV2 {
 		} catch (ParseException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		}
-		return response;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return response;
 	}
 
 	private String getSdkServiceUrl(List<BiometricType> modalitiesToExtract, Map<String, String> flags) {
@@ -362,20 +362,20 @@ public class Client_V_1_0 implements IBioApiV2 {
 				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
 			}
 			convertAndSetResponseObject(response, responseEntity);
-		} catch (ParseException e) {
+		} catch (ParseException | JsonProcessingException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 		return response;
 	}
 
-	private void convertAndSetResponseObject(Response<BiometricRecord> response, ResponseEntity<?> responseEntity) throws ParseException {
+	private void convertAndSetResponseObject(Response<BiometricRecord> response, ResponseEntity<?> responseEntity) throws ParseException, JsonProcessingException {
 		String responseBody = responseEntity.getBody().toString();
 		JSONParser parser = new JSONParser();
 		JSONObject js = (JSONObject) parser.parse(responseBody);
 
 		/* Error handler */
-		errorHandler(js.get("errors") != null ? gson.fromJson(js.get("errors").toString(), errorDtoListType) : null);
+		errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
 		JSONObject jsonResponse = (JSONObject) parser.parse(js.get("response").toString());
 		response.setStatusCode(
@@ -385,12 +385,9 @@ public class Client_V_1_0 implements IBioApiV2 {
 				jsonResponse.get("statusMessage") != null ? jsonResponse.get("statusMessage").toString() : ""
 		);
 		response.setResponse(
-				gson.fromJson(jsonResponse.get("response") != null ? jsonResponse.get("response").toString() : null, BiometricRecord.class)
+				jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), new TypeReference<BiometricRecord>() {}) : null
 		);
 	}
-
-	
-
 
 	@Override
 	@Deprecated
@@ -417,13 +414,12 @@ public class Client_V_1_0 implements IBioApiV2 {
 			String responseBody = responseEntity.getBody().toString();
 			JSONParser parser = new JSONParser();
 			JSONObject js = (JSONObject) parser.parse(responseBody);
-			Gson gson = new Gson();
 
 			/* Error handler */
-			errorHandler(js.get("errors") != null ? gson.fromJson(js.get("errors").toString(), errorDtoListType) : null);
+			errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-			resBiometricRecord = gson.fromJson(js.get("response").toString(), BiometricRecord.class);
-		} catch (ParseException e) {
+			resBiometricRecord = Util.getObjectMapper().readValue(js.get("response").toString(), new TypeReference<BiometricRecord>() {});
+		} catch (ParseException | JsonProcessingException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
@@ -453,23 +449,23 @@ public class Client_V_1_0 implements IBioApiV2 {
 				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
 			}
 			String responseBody = responseEntity.getBody().toString();
-			convertAndSetResponseObject(response, responseBody, BiometricRecord.class);
+			convertAndSetResponseObject(response, responseBody, new TypeReference<BiometricRecord>() {});
 		} catch (ParseException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
-		}
-		return response;
+		} catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+            return response;
 	}
 
-	private <T> void convertAndSetResponseObject(Response<T> response, String responseBody, Class<T> clazz) throws ParseException {
+	private <T> void convertAndSetResponseObject(Response<T> response, String responseBody, TypeReference<T> type) throws ParseException, JsonProcessingException {
 		JSONParser parser = new JSONParser();
 		JSONObject js = (JSONObject) parser.parse(responseBody);
 
 		/* Error handler */
-		errorHandler(js.get("errors") != null ? gson.fromJson(js.get("errors").toString(), errorDtoListType) : null);
+		errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-		/* Error handler */
-		errorHandler(js.get("errors") != null ? gson.fromJson(js.get("errors").toString(), errorDtoListType) : null);
 
 		JSONObject jsonResponse = (JSONObject) parser.parse(js.get("response").toString());
 		response.setStatusCode(
@@ -479,15 +475,14 @@ public class Client_V_1_0 implements IBioApiV2 {
 				jsonResponse.get("statusMessage") != null ? jsonResponse.get("statusMessage").toString() : ""
 		);
 		response.setResponse(
-				gson.fromJson(jsonResponse.get("response") != null ? jsonResponse.get("response").toString() : null, clazz)
+				jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), type) : null
 		);
 	}
 
-	private RequestDto generateNewRequestDto(Object body){
-		Gson gson = new Gson();
+	private RequestDto generateNewRequestDto(Object body) throws JsonProcessingException {
 		RequestDto requestDto = new RequestDto();
 		requestDto.setVersion(VERSION);
-		requestDto.setRequest(Util.base64Encode(gson.toJson(body)));
+		requestDto.setRequest(Util.base64Encode(Util.getObjectMapper().writeValueAsString(body)));
 		return requestDto;
 	}
 	
