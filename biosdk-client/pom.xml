@@ -318,7 +318,6 @@
 					<target>11</target>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
 				<version>${maven.deploy.version}</version>
