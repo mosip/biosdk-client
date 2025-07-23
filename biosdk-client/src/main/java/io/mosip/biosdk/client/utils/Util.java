@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import io.mosip.biosdk.client.config.LoggerConfig;
+import io.mosip.biosdk.client.dto.MatchDecisionMixin;
+import io.mosip.kernel.biometrics.model.MatchDecision;
 import io.mosip.kernel.biometrics.model.SDKInfo;
 import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.logger.spi.Logger;
@@ -54,6 +56,7 @@ public class Util {
             module.addSerializer(byte[].class, new BytesToStringSerializer());
             module.addDeserializer(LocalDateTime.class, new CustomLocalDateTimeDeSerializer());
             module.addDeserializer(SDKInfo.class, new SDKInfoDeserializer());
+            mapper.addMixIn(MatchDecision.class, MatchDecisionMixin.class);
             mapper.registerModule(module);
             mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
             mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);

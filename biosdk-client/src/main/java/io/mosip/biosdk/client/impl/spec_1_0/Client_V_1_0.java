@@ -274,7 +274,7 @@ public class Client_V_1_0 implements IBioApiV2 {
 				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
 			}
 			String responseBody = responseEntity.getBody().toString();
-			logger.debug("Response Body:", responseBody);
+			System.out.println("Response Body: "+ responseBody);
 			JSONParser parser = new JSONParser();
 			JSONObject js = (JSONObject) parser.parse(responseBody);
 
@@ -282,7 +282,7 @@ public class Client_V_1_0 implements IBioApiV2 {
 			errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
 			JSONObject jsonResponse = (JSONObject) parser.parse(js.get("response").toString());
-			logger.debug("Parsed jsonResponse:", jsonResponse.toJSONString());
+			System.out.println("Parsed jsonResponse: "+ jsonResponse.toJSONString());
 			response.setStatusCode(
 				jsonResponse.get("statusCode") != null ? ((Long)jsonResponse.get("statusCode")).intValue() : null
 			);
