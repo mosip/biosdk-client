@@ -7,9 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import io.mosip.biosdk.client.config.LoggerConfig;
-import io.mosip.biosdk.client.dto.MatchDecisionMixin;
-import io.mosip.kernel.biometrics.model.MatchDecision;
-import io.mosip.kernel.biometrics.model.SDKInfo;
 import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.logger.spi.Logger;
 import org.apache.commons.lang3.BooleanUtils;
@@ -29,7 +26,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Map;
 
