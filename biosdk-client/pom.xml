@@ -87,7 +87,7 @@
 		<!-- Kernel -->
 		<kernel.logger.logback.version>1.2.0.1</kernel.logger.logback.version>
 		<kernel.core.version>1.2.0.1</kernel.core.version>
-		<kernel.biometrics.api.version>1.2.0.1</kernel.biometrics.api.version>
+		<kernel.biometrics.api.version>1.2.0.4-SNAPSHOT</kernel.biometrics.api.version>
 	</properties>
 
 	<dependencies>

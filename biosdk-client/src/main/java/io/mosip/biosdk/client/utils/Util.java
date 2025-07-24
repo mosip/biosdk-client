@@ -52,11 +52,6 @@ public class Util {
         if(mapper == null) {
             mapper = new ObjectMapper().registerModule(new AfterburnerModule());
             SimpleModule module = new SimpleModule();
-            module.addSerializer(LocalDateTime.class, new CustomLocalDateTimeSerializer());
-            module.addSerializer(byte[].class, new BytesToStringSerializer());
-            module.addDeserializer(LocalDateTime.class, new CustomLocalDateTimeDeSerializer());
-            module.addDeserializer(SDKInfo.class, new SDKInfoDeserializer());
-            mapper.addMixIn(MatchDecision.class, MatchDecisionMixin.class);
             mapper.registerModule(module);
             mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
             mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
