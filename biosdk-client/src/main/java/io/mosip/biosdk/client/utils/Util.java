@@ -26,6 +26,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
+import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Map;
 
@@ -46,9 +47,14 @@ public class Util {
 
     public static ObjectMapper getObjectMapper() {
         if(mapper == null) {
-            mapper = new ObjectMapper().registerModule(new AfterburnerModule());
             SimpleModule module = new SimpleModule();
+            module.addSerializer(LocalDateTime.class, new LocalDateTimeToDateTimeObjectSerializer());
+            module.addDeserializer(LocalDateTime.class, new DateTimeObjectToLocalDateTimeDeserializer());
+            module.addSerializer(byte[].class, new ByteArrayToIntArraySerializer());
+            module.addDeserializer(byte[].class, new IntArrayToByteArrayDeserializer());
+            mapper = new ObjectMapper().registerModule(new AfterburnerModule());
             mapper.registerModule(module);
+            //mapper.registerModule(new JavaTimeModule());
             mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
             mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
             mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
