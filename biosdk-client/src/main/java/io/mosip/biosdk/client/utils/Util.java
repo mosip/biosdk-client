@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import io.mosip.biosdk.client.config.LoggerConfig;
-import io.mosip.kernel.biometrics.model.SDKInfo;
 import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.logger.spi.Logger;
 import org.apache.commons.lang3.BooleanUtils;
@@ -27,7 +26,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Map;
 
@@ -50,10 +48,6 @@ public class Util {
         if(mapper == null) {
             mapper = new ObjectMapper().registerModule(new AfterburnerModule());
             SimpleModule module = new SimpleModule();
-            module.addSerializer(LocalDateTime.class, new CustomLocalDateTimeSerializer());
-            module.addSerializer(byte[].class, new BytesToStringSerializer());
-            module.addDeserializer(LocalDateTime.class, new CustomLocalDateTimeDeSerializer());
-            module.addDeserializer(SDKInfo.class, new SDKInfoDeserializer());
             mapper.registerModule(module);
             mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
             mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
