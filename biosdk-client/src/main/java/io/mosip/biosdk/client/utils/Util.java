@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import io.mosip.biosdk.client.config.LoggerConfig;
 import io.mosip.kernel.biometrics.entities.ByteArrayToIntArraySerializer;
 import io.mosip.kernel.biometrics.entities.IntArrayToByteArrayDeserializer;
@@ -27,7 +28,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Map;
 
@@ -52,7 +52,7 @@ public class Util {
             module.addSerializer(byte[].class, new ByteArrayToIntArraySerializer());
             module.addDeserializer(byte[].class, new IntArrayToByteArrayDeserializer());
             mapper = new ObjectMapper();
-            // mapper.registerModule(new AfterburnerModule());
+            mapper.registerModule(new AfterburnerModule());
             mapper.registerModule(module);
             mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
             mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
