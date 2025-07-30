@@ -238,9 +238,6 @@ public class Client_V_1_0 implements IBioApiV2 {
 				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
 			}
 			String responseBody = responseEntity.getBody().toString();
-			System.out.println("checkQuality:: Started --------------------------");
-			System.out.println("checkQuality:: Response Body:" + responseBody);
-			System.out.println("checkQuality:: Ended --------------------------");
 			JSONParser parser = new JSONParser();
 			JSONObject js = (JSONObject) parser.parse(responseBody);
 			JSONObject responseJson =(JSONObject)  ((JSONObject) js.get("response")).get("response");
@@ -277,9 +274,6 @@ public class Client_V_1_0 implements IBioApiV2 {
 				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
 			}
 			String responseBody = responseEntity.getBody().toString();
-			System.out.println("match:: Started --------------------------");
-			System.out.println("match:: Response Body:" + responseBody);
-			System.out.println("match:: Ended --------------------------");
 			JSONParser parser = new JSONParser();
 			JSONObject js = (JSONObject) parser.parse(responseBody);
 
@@ -322,9 +316,7 @@ public class Client_V_1_0 implements IBioApiV2 {
 				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
 				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
 			}
-			System.out.println("extractTemplate:: Started --------------------------");
 			convertAndSetResponseObject(response, responseEntity);
-			System.out.println("extractTemplate:: Ended --------------------------");
 
 		} catch (ParseException e) {
 			e.printStackTrace();
@@ -370,9 +362,7 @@ public class Client_V_1_0 implements IBioApiV2 {
 				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
 				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
 			}
-			System.out.println("segment:: Started --------------------------");
 			convertAndSetResponseObject(response, responseEntity);
-			System.out.println("segment:: Ended --------------------------");
 		} catch (ParseException | JsonProcessingException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
@@ -382,9 +372,6 @@ public class Client_V_1_0 implements IBioApiV2 {
 
 	private void convertAndSetResponseObject(Response<BiometricRecord> response, ResponseEntity<?> responseEntity) throws ParseException, JsonProcessingException {
 		String responseBody = responseEntity.getBody().toString();
-		System.out.println("convertAndSetResponseObject:: Started --------------------------");
-		System.out.println("convertAndSetResponseObject:: Response Body:" + responseBody);
-		System.out.println("convertAndSetResponseObject:: Ended --------------------------");
 		JSONParser parser = new JSONParser();
 		JSONObject js = (JSONObject) parser.parse(responseBody);
 
