@@ -9,23 +9,24 @@ import io.mosip.biosdk.client.config.LoggerConfig;
 import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.logger.spi.Logger;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.hc.client5.http.classic.HttpClient;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.springframework.http.*;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.ssl.TLS;
+import org.apache.hc.core5.ssl.SSLContexts;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.net.ssl.HostnameVerifier;
+import org.springframework.http.*;
+import org.springframework.web.client.RestClientException;
+
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
 import java.util.Base64;
 import java.util.Map;
 
@@ -138,25 +139,36 @@ public class Util {
      * @throws KeyStoreException        If keystore initialization fails.
      * @throws KeyManagementException   If SSL context initialization fails.
      */
-    private static RestTemplate getRestTemplate() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    private static synchronized RestTemplate getRestTemplate() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         if (REST_TEMPLATE == null) {
-            HttpClientBuilder httpClientBuilder = HttpClients.custom()
-                    .setMaxConnPerRoute(getMaxConnectionPerRouteFromEnv())
-                    .setMaxConnTotal(getTotalMaxConnectionsFromEnv())
-                    .disableCookieManagement();
+            // Configure connection manager for pooling
+            PoolingHttpClientConnectionManager connectionManager;
             if (getSSLBypassFromEnv()) {
-                TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
-                SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
-                        .loadTrustMaterial(null, acceptingTrustStrategy).build();
-                SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new HostnameVerifier() {
-                    public boolean verify(String arg0, SSLSession arg1) {
-                        return true;
-                    }
-                });
-                httpClientBuilder.setSSLSocketFactory(csf);
+                // Create an SSL context that trusts all certificates
+                SSLContext sslContext = SSLContexts.custom()
+                        .loadTrustMaterial(null, (chain, authType) -> true)
+                        .build();
+                SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
+                        sslContext, new String[]{TLS.V_1_3.toString(), TLS.V_1_2.toString()}, null, NoopHostnameVerifier.INSTANCE);
+                connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                        .setSSLSocketFactory(socketFactory)
+                        .setMaxConnPerRoute(getMaxConnectionPerRouteFromEnv())
+                        .setMaxConnTotal(getTotalMaxConnectionsFromEnv())
+                        .build();
+            } else {
+                connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                        .setMaxConnPerRoute(getMaxConnectionPerRouteFromEnv())
+                        .setMaxConnTotal(getTotalMaxConnectionsFromEnv())
+                        .build();
             }
-            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-            requestFactory.setHttpClient((HttpClient) httpClientBuilder.build());
+
+            // Configure HttpClient
+            CloseableHttpClient httpClient = HttpClients.custom()
+                    .setConnectionManager(connectionManager)
+                    .disableCookieManagement()
+                    .build();
+
+            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
             REST_TEMPLATE = new RestTemplate(requestFactory);
         }
         return REST_TEMPLATE;

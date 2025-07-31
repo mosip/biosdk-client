@@ -3,7 +3,9 @@ package io.mosip.biosdk.client.impl.spec_1_0;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.mosip.biosdk.client.config.LoggerConfig;
+import io.mosip.biosdk.client.constant.ResponseStatus;
 import io.mosip.biosdk.client.dto.*;
+import io.mosip.biosdk.client.exception.BioSdkClientException;
 import io.mosip.biosdk.client.utils.Util;
 import io.mosip.kernel.biometrics.constant.BiometricType;
 import io.mosip.kernel.biometrics.entities.BiometricRecord;
@@ -50,10 +52,17 @@ public class Client_V_1_0 implements IBioApiV2 {
 
     private static final String VERSION = "1.0";
 
-    TypeReference<List<ErrorDto>> errorDtoListTypeRef = new TypeReference<List<ErrorDto>>() {
+    private TypeReference<List<ErrorDto>> errorDtoListTypeRef = new TypeReference<List<ErrorDto>>() {
     };
 
     private Map<String, String> sdkUrlsMap;
+
+    private static final String TAG_HTTP_URL = "HTTP url: ";
+    private static final String TAG_HTTP_STATUS = "HTTP status: ";
+    private static final String TAG_ERRORS = "errors";
+    private static final String TAG_RESPONSE = "response";
+    private static final String TAG_STATUS_CODE = "statusCode";
+    private static final String TAG_STATUS_MESSAGE = "statusMessage";
 
     /**
      * Initializes the BioSDK client using the provided initialization parameters.
@@ -155,7 +164,7 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @param initParams A map of initialization parameters to be included in the init request.
      * @param sdkServiceUrl The URL of the SDK service to be initialized.
      * @return A {@link SDKInfo} object containing details about the initialized SDK.
-     * @throws RuntimeException if there is an error during HTTP communication or response parsing.
+     * @throws BioSdkClientException if there is an error during HTTP communication or response parsing.
      */
     private SDKInfo initForSdkUrl(Map<String, String> initParams, String sdkServiceUrl) {
         SDKInfo sdkInfo = null;
@@ -167,7 +176,8 @@ public class Client_V_1_0 implements IBioApiV2 {
             ResponseEntity<?> responseEntity = Util.restRequest(sdkServiceUrl + "/init", HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
             if (!responseEntity.getStatusCode().is2xxSuccessful()) {
                 logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+                throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR + "",
+                        TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
             }
             String responseBody = responseEntity.getBody().toString();
             JSONParser parser = new JSONParser();
@@ -180,10 +190,10 @@ public class Client_V_1_0 implements IBioApiV2 {
             });
         } catch (ParseException e) {
             logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
-            throw new RuntimeException(e);
+            throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR + "", e.getLocalizedMessage(), e);
         } catch (JsonProcessingException e) {
             logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
-            throw new RuntimeException(e);
+            throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR + "", e.getLocalizedMessage(), e);
         }
         return sdkInfo;
     }
@@ -270,6 +280,9 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @return The default SDK service URL from environment variables, or null if not defined.
      */
     private String getDefaultSdkServiceUrlFromEnv() {
+        if (System.getProperty(MOSIP_BIOSDK_SERVICE) != null)
+            return System.getProperty(MOSIP_BIOSDK_SERVICE);
+
         return System.getenv(MOSIP_BIOSDK_SERVICE);
     }
 
@@ -280,7 +293,7 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @param modalitiesToCheck List of biometric modalities to check quality for.
      * @param flags Additional configuration flags.
      * @return A response containing the quality check result.
-     * @throws RuntimeException if parsing or processing of response fails.
+     * @throws BioSdkClientException if parsing or processing of response fails.
      */
     @Override
     public Response<QualityCheck> checkQuality(BiometricRecord sample, List<BiometricType> modalitiesToCheck, Map<String, String> flags) {
@@ -297,7 +310,8 @@ public class Client_V_1_0 implements IBioApiV2 {
             ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
             if (!responseEntity.getStatusCode().is2xxSuccessful()) {
                 logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+                throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "",
+                        TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
             }
             String responseBody = responseEntity.getBody().toString();
             JSONParser parser = new JSONParser();
@@ -309,9 +323,10 @@ public class Client_V_1_0 implements IBioApiV2 {
 
             qualityCheck = Util.getObjectMapper().readValue(responseJson.toString(), new TypeReference<QualityCheck>() {
             });
-        } catch (ParseException | JsonProcessingException e) {
+        } catch (Exception e) {
             logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
-            throw new RuntimeException(e);
+            throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "", e.getLocalizedMessage(),
+                    e);
         }
         response.setResponse(qualityCheck);
         return response;
@@ -325,7 +340,7 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @param modalitiesToMatch List of biometric modalities to consider for matching.
      * @param flags Additional configuration flags.
      * @return A response containing an array of match decisions.
-     * @throws RuntimeException if parsing or processing of response fails.
+     * @throws BioSdkClientException if parsing or processing of response fails.
      */
     @Override
     public Response<MatchDecision[]> match(BiometricRecord sample, BiometricRecord[] gallery,
@@ -343,7 +358,8 @@ public class Client_V_1_0 implements IBioApiV2 {
             ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
             if (!responseEntity.getStatusCode().is2xxSuccessful()) {
                 logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+                throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR + "",
+                        TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
             }
             String responseBody = responseEntity.getBody().toString();
             JSONParser parser = new JSONParser();
@@ -363,12 +379,10 @@ public class Client_V_1_0 implements IBioApiV2 {
                     jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), new TypeReference<MatchDecision[]>() {
                     }) : null
             );
-        } catch (ParseException e) {
+        } catch (Exception e) {
             logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
-            throw new RuntimeException(e);
-        } catch (JsonProcessingException e) {
-            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
-            throw new RuntimeException(e);
+            throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "", e.getLocalizedMessage(),
+                    e);
         }
         return response;
     }
@@ -380,7 +394,7 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @param modalitiesToExtract List of biometric modalities to extract templates for.
      * @param flags Additional configuration flags that may influence the extraction process.
      * @return A response containing the extracted biometric template.
-     * @throws RuntimeException if parsing or processing of response fails.
+     * @throws BioSdkClientException if parsing or processing of response fails.
      */
     @Override
     public Response<BiometricRecord> extractTemplate(BiometricRecord sample, List<BiometricType> modalitiesToExtract, Map<String, String> flags) {
@@ -396,16 +410,15 @@ public class Client_V_1_0 implements IBioApiV2 {
             ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
             if (!responseEntity.getStatusCode().is2xxSuccessful()) {
                 logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+                throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "",
+                        TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
             }
             convertAndSetResponseObject(response, responseEntity);
 
-        } catch (ParseException e) {
+        } catch (Exception e) {
             logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
-            throw new RuntimeException(e);
-        } catch (JsonProcessingException e) {
-            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
-            throw new RuntimeException(e);
+            throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "", e.getLocalizedMessage(),
+                    e);
         }
         return response;
     }
@@ -443,7 +456,7 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @param modalitiesToSegment List of biometric modalities to perform segmentation on.
      * @param flags Additional configuration flags that may influence the segmentation process.
      * @return A response containing the segmented biometric record.
-     * @throws RuntimeException if parsing or processing of the response fails.
+     * @throws BioSdkClientException if parsing or processing of the response fails.
      */
     @Override
     public Response<BiometricRecord> segment(BiometricRecord biometricRecord, List<BiometricType> modalitiesToSegment, Map<String, String> flags) {
@@ -459,12 +472,14 @@ public class Client_V_1_0 implements IBioApiV2 {
             ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
             if (!responseEntity.getStatusCode().is2xxSuccessful()) {
                 logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+                throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "",
+                        TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
             }
             convertAndSetResponseObject(response, responseEntity);
-        } catch (ParseException | JsonProcessingException e) {
+        } catch (Exception e) {
             logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
-            throw new RuntimeException(e);
+            throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "", e.getLocalizedMessage(),
+                    e);
         }
         return response;
     }
@@ -476,7 +491,7 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @param response The response object to populate with parsed data.
      * @param responseEntity The raw HTTP response entity received from the service call.
      * @throws ParseException If there is an error while parsing the JSON response body.
-     * @throws JsonProcessingException If the JSON mapping fails during response conversion.
+     * @throws BioSdkClientException  If the JSON mapping fails during response conversion.
      */
     private void convertAndSetResponseObject(Response<BiometricRecord> response, ResponseEntity<?> responseEntity) throws ParseException, JsonProcessingException {
         String responseBody = responseEntity.getBody().toString();
@@ -510,7 +525,7 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @param targetParams Additional target format parameters.
      * @param modalitiesToConvert List of biometric modalities to be converted.
      * @return Converted {@link BiometricRecord}.
-     * @throws RuntimeException if parsing or processing of the response fails.
+     * @throws BioSdkClientException if parsing or processing of the response fails.
      */
     @Override
     @Deprecated
@@ -531,7 +546,8 @@ public class Client_V_1_0 implements IBioApiV2 {
             ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
             if (!responseEntity.getStatusCode().is2xxSuccessful()) {
                 logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+                throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "",
+                        TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
             }
             String responseBody = responseEntity.getBody().toString();
             JSONParser parser = new JSONParser();
@@ -542,9 +558,10 @@ public class Client_V_1_0 implements IBioApiV2 {
 
             resBiometricRecord = Util.getObjectMapper().readValue(js.get("response").toString(), new TypeReference<BiometricRecord>() {
             });
-        } catch (ParseException | JsonProcessingException e) {
+        } catch (Exception e) {
             logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
-            throw new RuntimeException(e);
+            throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "", e.getLocalizedMessage(),
+                    e);
         }
         return resBiometricRecord;
     }
@@ -560,7 +577,7 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @param targetParams Additional target format parameters.
      * @param modalitiesToConvert List of biometric modalities to be converted.
      * @return Response containing converted {@link BiometricRecord} and status information.
-     * @throws RuntimeException if parsing or processing of the response fails.
+     * @throws BioSdkClientException if parsing or processing of the response fails.
      */
     @Override
     public Response<BiometricRecord> convertFormatV2(BiometricRecord sample, String sourceFormat, String targetFormat,
@@ -581,16 +598,15 @@ public class Client_V_1_0 implements IBioApiV2 {
             ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
             if (!responseEntity.getStatusCode().is2xxSuccessful()) {
                 logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+                throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "",
+                        TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
             }
             String responseBody = responseEntity.getBody().toString();
             convertAndSetResponseObject(response, responseBody, new TypeReference<BiometricRecord>() {
             });
-        } catch (ParseException e) {
-            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
-            throw new RuntimeException(e);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e)  {
+            throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "", e.getLocalizedMessage(),
+                    e);
         }
         return response;
     }
@@ -649,10 +665,20 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @throws RuntimeException If one or more errors are present in the list.
      */
     private void errorHandler(List<ErrorDto> errors) {
-        if (errors != null) {
-            for (ErrorDto errorDto : errors) {
-                throw new RuntimeException(errorDto.getCode() + " ---> " + errorDto.getMessage());
+        if (errors == null) {
+            return;
+        }
+
+        StringBuilder errorMessages = new StringBuilder();
+        for (ErrorDto errorDto : errors) {
+            if (errorDto != null) {
+                errorMessages.append("Code: ").append(errorDto.getCode()).append(", Message: ")
+                        .append(errorDto.getMessage()).append(System.lineSeparator());
             }
+        }
+        if (!errorMessages.isEmpty()) {
+            throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "",
+                    errorMessages.toString());
         }
     }
 }
