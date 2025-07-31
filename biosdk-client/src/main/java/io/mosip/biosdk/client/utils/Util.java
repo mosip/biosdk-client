@@ -117,12 +117,9 @@ public class Util {
                 utilLogger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "Response: ",
                         getObjectMapper().writeValueAsString(response.getBody()));
             }
-        } catch (RestClientException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException ex) {
+        } catch (Exception ex) {
             utilLogger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error ", ex);
             throw new RestClientException("rest call failed" + ExceptionUtils.getStackTrace(ex));
-        } catch (JsonProcessingException ex) {
-            utilLogger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error ", ex);
-            throw new RuntimeException(ex);
         }
         return response;
     }
