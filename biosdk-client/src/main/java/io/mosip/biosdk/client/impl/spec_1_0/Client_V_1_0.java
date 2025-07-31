@@ -1,34 +1,10 @@
 package io.mosip.biosdk.client.impl.spec_1_0;
 
-import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_IDTYPE;
-import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_SESSIONID;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import io.mosip.biosdk.client.utils.*;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import io.mosip.biosdk.client.config.LoggerConfig;
-import io.mosip.biosdk.client.dto.CheckQualityRequestDto;
-import io.mosip.biosdk.client.dto.ConvertFormatRequestDto;
-import io.mosip.biosdk.client.dto.ErrorDto;
-import io.mosip.biosdk.client.dto.ExtractTemplateRequestDto;
-import io.mosip.biosdk.client.dto.InitRequestDto;
-import io.mosip.biosdk.client.dto.MatchRequestDto;
-import io.mosip.biosdk.client.dto.RequestDto;
-import io.mosip.biosdk.client.dto.SegmentRequestDto;
+import io.mosip.biosdk.client.dto.*;
+import io.mosip.biosdk.client.utils.Util;
 import io.mosip.kernel.biometrics.constant.BiometricType;
 import io.mosip.kernel.biometrics.entities.BiometricRecord;
 import io.mosip.kernel.biometrics.model.MatchDecision;
@@ -37,6 +13,19 @@ import io.mosip.kernel.biometrics.model.Response;
 import io.mosip.kernel.biometrics.model.SDKInfo;
 import io.mosip.kernel.biometrics.spi.IBioApiV2;
 import io.mosip.kernel.core.logger.spi.Logger;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_IDTYPE;
+import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_SESSIONID;
 
 /**
  * The Class BioApiImpl.
@@ -45,446 +34,625 @@ import io.mosip.kernel.core.logger.spi.Logger;
  * @author Manoj SP
  * @author Ankit
  * @author Loganathan Sekar
- *
  */
 public class Client_V_1_0 implements IBioApiV2 {
-	private static Logger logger = LoggerConfig.logConfig(Client_V_1_0.class);
+    private static Logger logger = LoggerConfig.logConfig(Client_V_1_0.class);
 
-	private static final String FORMAT_SUFFIX = ".format";
+    private static final String FORMAT_SUFFIX = ".format";
 
-	private static final String DEFAULT = "default";
+    private static final String DEFAULT = "default";
 
-	private static final String FORMAT_URL_PREFIX = "format.url.";
+    private static final String FORMAT_URL_PREFIX = "format.url.";
 
-	private static final String PARAMETER_PREFIX = "config.parameter.";
+    private static final String PARAMETER_PREFIX = "config.parameter.";
 
-	private static final String MOSIP_BIOSDK_SERVICE = "mosip_biosdk_service";
+    private static final String MOSIP_BIOSDK_SERVICE = "mosip_biosdk_service";
 
-	private static final String VERSION = "1.0";
+    private static final String VERSION = "1.0";
 
-	TypeReference<List<ErrorDto>> errorDtoListTypeRef = new TypeReference<List<ErrorDto>>(){};
+    TypeReference<List<ErrorDto>> errorDtoListTypeRef = new TypeReference<List<ErrorDto>>() {
+    };
 
-	private Map<String, String> sdkUrlsMap;
+    private Map<String, String> sdkUrlsMap;
 
-	@Override
-	public SDKInfo init(Map<String, String> initParams) {
-		sdkUrlsMap = getSdkUrls(initParams);
-		setConfigParameters(initParams);
-		List<SDKInfo> sdkInfos = sdkUrlsMap.values()
-				.stream()
-				.map(sdkUrl -> initForSdkUrl(initParams, sdkUrl))
-				.collect(Collectors.toList());
-		return getAggregatedSdkInfo(sdkInfos);
-	}
+    /**
+     * Initializes the BioSDK client using the provided initialization parameters.
+     *
+     * @param initParams A map of initialization parameters including SDK URLs and configuration values.
+     * @return An aggregated {@link SDKInfo} object containing combined SDK information.
+     */
+    @Override
+    public SDKInfo init(Map<String, String> initParams) {
+        sdkUrlsMap = getSdkUrls(initParams);
+        setConfigParameters(initParams);
+        List<SDKInfo> sdkInfos = sdkUrlsMap.values()
+                .stream()
+                .map(sdkUrl -> initForSdkUrl(initParams, sdkUrl))
+                .collect(Collectors.toList());
+        return getAggregatedSdkInfo(sdkInfos);
+    }
 
-	private void setConfigParameters(Map<String, String> initParams) {
-		Map<String, String> parametersMap = new HashMap<>(initParams.entrySet()
-				.stream()
-				.filter(entry -> entry.getKey().contains(PARAMETER_PREFIX))
-				.collect(Collectors.toMap(entry -> entry.getKey()
-						.substring(PARAMETER_PREFIX.length()), Entry::getValue)));
+    /**
+     * Sets configuration parameters as system properties from the initialization parameters.
+     *
+     * @param initParams A map of key-value pairs where keys containing the defined prefix will be set as system properties.
+     */
+    private void setConfigParameters(Map<String, String> initParams) {
+        Map<String, String> parametersMap = new HashMap<>(initParams.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().contains(PARAMETER_PREFIX))
+                .collect(Collectors.toMap(entry -> entry.getKey()
+                        .substring(PARAMETER_PREFIX.length()), Entry::getValue)));
 
-		for(Map.Entry<String, String> map : parametersMap.entrySet()) {
-			System.setProperty(map.getKey(), map.getValue());
-		}
-	}
+        for (Map.Entry<String, String> map : parametersMap.entrySet()) {
+            System.setProperty(map.getKey(), map.getValue());
+        }
+    }
 
-	private SDKInfo getAggregatedSdkInfo(List<SDKInfo> sdkInfos) {
-		SDKInfo sdkInfo;
-		if(!sdkInfos.isEmpty()) {
-			sdkInfo = sdkInfos.get(0);
-			if(sdkInfos.size() == 1) {
-				return sdkInfo;
-			} else {
-				return getAggregatedSdkInfo(sdkInfos, sdkInfo);
-			}
-		} else {
-			sdkInfo = null;
-		}
-		return sdkInfo;
-	}
+    /**
+     * Aggregates SDK information from multiple SDK instances.
+     *
+     * @param sdkInfos A list of {@link SDKInfo} objects retrieved from different SDK URLs.
+     * @return A single aggregated {@link SDKInfo} object combining relevant details.
+     */
+    private SDKInfo getAggregatedSdkInfo(List<SDKInfo> sdkInfos) {
+        SDKInfo sdkInfo;
+        if (!sdkInfos.isEmpty()) {
+            sdkInfo = sdkInfos.get(0);
+            if (sdkInfos.size() == 1) {
+                return sdkInfo;
+            } else {
+                return getAggregatedSdkInfo(sdkInfos, sdkInfo);
+            }
+        } else {
+            sdkInfo = null;
+        }
+        return sdkInfo;
+    }
 
-	private SDKInfo getAggregatedSdkInfo(List<SDKInfo> sdkInfos, SDKInfo sdkInfo) {
-		String organization = sdkInfo.getProductOwner() == null ? null : sdkInfo.getProductOwner().getOrganization();
-		String type = sdkInfo.getProductOwner() == null ? null : sdkInfo.getProductOwner().getType();
-		SDKInfo aggregatedSdkInfo = new SDKInfo(sdkInfo.getApiVersion(), sdkInfo.getSdkVersion(), organization, type);
-		sdkInfos.forEach(info -> addOtherSdkInfoDetails(info, aggregatedSdkInfo));
-		return aggregatedSdkInfo;
-	}
+    /**
+     * Combines details from multiple {@link SDKInfo} objects into a single aggregated SDKInfo.
+     *
+     * @param sdkInfos   A list of SDKInfo objects retrieved from multiple SDK URLs.
+     * @param sdkInfo    The base SDKInfo object used as the primary reference for aggregation.
+     * @return An aggregated SDKInfo object containing combined API version, SDK version, organization, and type.
+     */
+    private SDKInfo getAggregatedSdkInfo(List<SDKInfo> sdkInfos, SDKInfo sdkInfo) {
+        String organization = sdkInfo.getProductOwner() == null ? null : sdkInfo.getProductOwner().getOrganization();
+        String type = sdkInfo.getProductOwner() == null ? null : sdkInfo.getProductOwner().getType();
+        SDKInfo aggregatedSdkInfo = new SDKInfo(sdkInfo.getApiVersion(), sdkInfo.getSdkVersion(), organization, type);
+        sdkInfos.forEach(info -> addOtherSdkInfoDetails(info, aggregatedSdkInfo));
+        return aggregatedSdkInfo;
+    }
 
-	private void addOtherSdkInfoDetails(SDKInfo sdkInfo, SDKInfo aggregatedSdkInfo) {
-		if(sdkInfo.getOtherInfo() != null) {
-			aggregatedSdkInfo.getOtherInfo().putAll(sdkInfo.getOtherInfo());
-		}
-		if(sdkInfo.getSupportedMethods() != null) {
-			aggregatedSdkInfo.getSupportedMethods().putAll(sdkInfo.getSupportedMethods());
-		}
-		if(sdkInfo.getSupportedModalities() != null) {
-			List<BiometricType> supportedModalities = aggregatedSdkInfo.getSupportedModalities();
-			supportedModalities.addAll(sdkInfo.getSupportedModalities()
-					.stream()
-					.filter(s -> !supportedModalities.contains(s))
-					.collect(Collectors.toList()));
-		}
-	}
+    /**
+     * Adds other SDK details such as additional info, supported methods, and supported modalities
+     * to the aggregated SDKInfo object while avoiding duplicates.
+     *
+     * @param sdkInfo The source {@link SDKInfo} object from which additional information is collected.
+     * @param aggregatedSdkInfo The aggregated {@link SDKInfo} object being updated with additional details.
+     */
+    private void addOtherSdkInfoDetails(SDKInfo sdkInfo, SDKInfo aggregatedSdkInfo) {
+        if (sdkInfo.getOtherInfo() != null) {
+            aggregatedSdkInfo.getOtherInfo().putAll(sdkInfo.getOtherInfo());
+        }
+        if (sdkInfo.getSupportedMethods() != null) {
+            aggregatedSdkInfo.getSupportedMethods().putAll(sdkInfo.getSupportedMethods());
+        }
+        if (sdkInfo.getSupportedModalities() != null) {
+            List<BiometricType> supportedModalities = aggregatedSdkInfo.getSupportedModalities();
+            supportedModalities.addAll(sdkInfo.getSupportedModalities()
+                    .stream()
+                    .filter(s -> !supportedModalities.contains(s))
+                    .collect(Collectors.toList()));
+        }
+    }
 
-	private SDKInfo initForSdkUrl(Map<String, String> initParams, String sdkServiceUrl) {
-		SDKInfo sdkInfo = null;
-		try {
-			InitRequestDto initRequestDto = new InitRequestDto();
-			initRequestDto.setInitParams(initParams);
+    /**
+     * Initializes the SDK for a specific service URL by sending an init request and parsing the response.
+     * Handles any errors encountered during initialization.
+     *
+     * @param initParams A map of initialization parameters to be included in the init request.
+     * @param sdkServiceUrl The URL of the SDK service to be initialized.
+     * @return A {@link SDKInfo} object containing details about the initialized SDK.
+     * @throws RuntimeException if there is an error during HTTP communication or response parsing.
+     */
+    private SDKInfo initForSdkUrl(Map<String, String> initParams, String sdkServiceUrl) {
+        SDKInfo sdkInfo = null;
+        try {
+            InitRequestDto initRequestDto = new InitRequestDto();
+            initRequestDto.setInitParams(initParams);
 
-			RequestDto requestDto = generateNewRequestDto(initRequestDto);
-			ResponseEntity<?> responseEntity = Util.restRequest(sdkServiceUrl+"/init", HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
-			if(!responseEntity.getStatusCode().is2xxSuccessful()){
-				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
-			}
-			String responseBody = responseEntity.getBody().toString();
-			JSONParser parser = new JSONParser();
-			JSONObject js = (JSONObject) parser.parse(responseBody);
+            RequestDto requestDto = generateNewRequestDto(initRequestDto);
+            ResponseEntity<?> responseEntity = Util.restRequest(sdkServiceUrl + "/init", HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
+            if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
+                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+            }
+            String responseBody = responseEntity.getBody().toString();
+            JSONParser parser = new JSONParser();
+            JSONObject js = (JSONObject) parser.parse(responseBody);
 
-			/* Error handler */
-			errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
+            /* Error handler */
+            errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-			sdkInfo = Util.getObjectMapper().readValue(js.get("response").toString(), new TypeReference<SDKInfo>() {});
-		} catch (ParseException e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error",  e);
-			throw new RuntimeException(e);
-		} catch (JsonProcessingException e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error",  e);
-			throw new RuntimeException(e);
-		}
-		return sdkInfo;
-	}
+            sdkInfo = Util.getObjectMapper().readValue(js.get("response").toString(), new TypeReference<SDKInfo>() {
+            });
+        } catch (ParseException e) {
+            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
+            throw new RuntimeException(e);
+        } catch (JsonProcessingException e) {
+            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
+            throw new RuntimeException(e);
+        }
+        return sdkInfo;
+    }
 
-	private Map<String, String> getSdkUrls(Map<String, String> initParams) {
-		Map<String, String> sdkUrls = new HashMap<>(initParams.entrySet()
-				.stream()
-				.filter(entry -> entry.getKey().contains(FORMAT_URL_PREFIX))
-				.collect(Collectors.toMap(entry -> entry.getKey()
-						.substring(FORMAT_URL_PREFIX.length()), Entry::getValue)));
-		if(!sdkUrls.containsKey(DEFAULT)) {
-			//If default is not specified in configuration, try getting it from env.
-			String defaultSdkServiceUrl = getDefaultSdkServiceUrlFromEnv();
-			if(defaultSdkServiceUrl != null) {
-				sdkUrls.put(DEFAULT, defaultSdkServiceUrl);
-			}
-		}
+    /**
+     * Extracts SDK URLs from the initialization parameters. If no default URL is provided, it attempts to fetch one from the environment variables.
+     * Ensures that at least one default URL is available.
+     *
+     * @param initParams A map containing initialization parameters including SDK URLs with a specific prefix.
+     * @return A map where keys represent format names and values represent SDK service URLs.
+     * @throws IllegalStateException if no valid SDK service URL is configured.
+     */
+    private Map<String, String> getSdkUrls(Map<String, String> initParams) {
+        Map<String, String> sdkUrls = new HashMap<>(initParams.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().contains(FORMAT_URL_PREFIX))
+                .collect(Collectors.toMap(entry -> entry.getKey()
+                        .substring(FORMAT_URL_PREFIX.length()), Entry::getValue)));
+        if (!sdkUrls.containsKey(DEFAULT)) {
+            //If default is not specified in configuration, try getting it from env.
+            String defaultSdkServiceUrl = getDefaultSdkServiceUrlFromEnv();
+            if (defaultSdkServiceUrl != null) {
+                sdkUrls.put(DEFAULT, defaultSdkServiceUrl);
+            }
+        }
 
-		//There needs a default URL to be used when no format is specified.
-		if(!sdkUrls.containsKey(DEFAULT) && !sdkUrls.isEmpty()) {
-			//Take any first url and set it to default
-			sdkUrls.put(DEFAULT, sdkUrls.values().iterator().next());
-		}
+        //There needs a default URL to be used when no format is specified.
+        if (!sdkUrls.containsKey(DEFAULT) && !sdkUrls.isEmpty()) {
+            //Take any first url and set it to default
+            sdkUrls.put(DEFAULT, sdkUrls.values().iterator().next());
+        }
 
-		if(sdkUrls.isEmpty()) {
-			throw new IllegalStateException("No valid sdk service url configured");
-		}
-		return sdkUrls;
-	}
+        if (sdkUrls.isEmpty()) {
+            throw new IllegalStateException("No valid sdk service url configured");
+        }
+        return sdkUrls;
+    }
 
-	private String getSdkServiceUrl(BiometricType modality, Map<String, String> flags) {
-		if(modality != null) {
-			String key = modality.name() + FORMAT_SUFFIX;
-			if(flags != null) {
-				Optional<String> formatFromFlag = flags.entrySet()
-						.stream()
-						.filter(e -> e.getKey().equalsIgnoreCase(key))
-						.findAny()
-						.map(Entry::getValue);
-				if(formatFromFlag.isPresent()) {
-					String format = formatFromFlag.get();
-					Optional<String> urlForFormat = sdkUrlsMap.entrySet()
-							.stream()
-							.filter(e -> e.getKey().equalsIgnoreCase(format))
-							.findAny()
-							.map(Entry::getValue);
-					if(urlForFormat.isPresent()) {
-						return urlForFormat.get();
-					}
-				}
-			}
-		}
-		return getDefaultSdkServiceUrl();
-	}
+    /**
+     * Retrieves the SDK service URL based on the biometric modality and provided flags.
+     * If no specific format URL is found for the modality, the default SDK service URL is returned.
+     *
+     * @param modality The {@link BiometricType} representing the biometric modality.
+     * @param flags A map of flags where keys may indicate the format for the specified modality.
+     * @return The corresponding SDK service URL for the modality or the default URL if none found.
+     */
+    private String getSdkServiceUrl(BiometricType modality, Map<String, String> flags) {
+        if (modality != null) {
+            String key = modality.name() + FORMAT_SUFFIX;
+            if (flags != null) {
+                Optional<String> formatFromFlag = flags.entrySet()
+                        .stream()
+                        .filter(e -> e.getKey().equalsIgnoreCase(key))
+                        .findAny()
+                        .map(Entry::getValue);
+                if (formatFromFlag.isPresent()) {
+                    String format = formatFromFlag.get();
+                    Optional<String> urlForFormat = sdkUrlsMap.entrySet()
+                            .stream()
+                            .filter(e -> e.getKey().equalsIgnoreCase(format))
+                            .findAny()
+                            .map(Entry::getValue);
+                    if (urlForFormat.isPresent()) {
+                        return urlForFormat.get();
+                    }
+                }
+            }
+        }
+        return getDefaultSdkServiceUrl();
+    }
 
-	private String getDefaultSdkServiceUrl() {
-		return sdkUrlsMap.get(DEFAULT);
-	}
+    /**
+     * Retrieves the default SDK service URL from the current SDK URLs map.
+     *
+     * @return The default SDK service URL, or null if not present.
+     */
+    private String getDefaultSdkServiceUrl() {
+        return sdkUrlsMap.get(DEFAULT);
+    }
 
-	private String getDefaultSdkServiceUrlFromEnv() {
-		return System.getenv(MOSIP_BIOSDK_SERVICE);
-	}
+    /**
+     * Retrieves the default SDK service URL from environment variables.
+     *
+     * @return The default SDK service URL from environment variables, or null if not defined.
+     */
+    private String getDefaultSdkServiceUrlFromEnv() {
+        return System.getenv(MOSIP_BIOSDK_SERVICE);
+    }
 
-	@Override
-	public Response<QualityCheck> checkQuality(BiometricRecord sample, List<BiometricType> modalitiesToCheck, Map<String, String> flags) {
-		Response<QualityCheck> response = new Response<>();
-		response.setStatusCode(200);
-		QualityCheck qualityCheck = null;
-		try {
-			CheckQualityRequestDto checkQualityRequestDto = new CheckQualityRequestDto();
-			checkQualityRequestDto.setSample(sample);
-			checkQualityRequestDto.setModalitiesToCheck(modalitiesToCheck);
-			checkQualityRequestDto.setFlags(flags);
-			RequestDto requestDto = generateNewRequestDto(checkQualityRequestDto);
-			String url = getSdkServiceUrl(modalitiesToCheck.get(0), flags)+"/check-quality";
-			ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
-			if(!responseEntity.getStatusCode().is2xxSuccessful()){
-				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
-			}
-			String responseBody = responseEntity.getBody().toString();
-			JSONParser parser = new JSONParser();
-			JSONObject js = (JSONObject) parser.parse(responseBody);
-			JSONObject responseJson =(JSONObject)  ((JSONObject) js.get("response")).get("response");
+    /**
+     * Checks the quality of a biometric sample for the given modalities.
+     *
+     * @param sample The biometric record to check.
+     * @param modalitiesToCheck List of biometric modalities to check quality for.
+     * @param flags Additional configuration flags.
+     * @return A response containing the quality check result.
+     * @throws RuntimeException if parsing or processing of response fails.
+     */
+    @Override
+    public Response<QualityCheck> checkQuality(BiometricRecord sample, List<BiometricType> modalitiesToCheck, Map<String, String> flags) {
+        Response<QualityCheck> response = new Response<>();
+        response.setStatusCode(200);
+        QualityCheck qualityCheck = null;
+        try {
+            CheckQualityRequestDto checkQualityRequestDto = new CheckQualityRequestDto();
+            checkQualityRequestDto.setSample(sample);
+            checkQualityRequestDto.setModalitiesToCheck(modalitiesToCheck);
+            checkQualityRequestDto.setFlags(flags);
+            RequestDto requestDto = generateNewRequestDto(checkQualityRequestDto);
+            String url = getSdkServiceUrl(modalitiesToCheck.get(0), flags) + "/check-quality";
+            ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
+            if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
+                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+            }
+            String responseBody = responseEntity.getBody().toString();
+            JSONParser parser = new JSONParser();
+            JSONObject js = (JSONObject) parser.parse(responseBody);
+            JSONObject responseJson = (JSONObject) ((JSONObject) js.get("response")).get("response");
 
-			/* Error handler */
-			errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
+            /* Error handler */
+            errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-			qualityCheck = Util.getObjectMapper().readValue(responseJson.toString(), new TypeReference<QualityCheck>() {});
-		} catch (ParseException | JsonProcessingException e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error",  e);
-			throw new RuntimeException(e);
-		}
-		response.setResponse(qualityCheck);
-		return response;
-	}
+            qualityCheck = Util.getObjectMapper().readValue(responseJson.toString(), new TypeReference<QualityCheck>() {
+            });
+        } catch (ParseException | JsonProcessingException e) {
+            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
+            throw new RuntimeException(e);
+        }
+        response.setResponse(qualityCheck);
+        return response;
+    }
 
-	@Override
-	public Response<MatchDecision[]> match(BiometricRecord sample, BiometricRecord[] gallery,
-										   List<BiometricType> modalitiesToMatch, Map<String, String> flags) {
-		Response<MatchDecision[]> response = new Response<>();
-		try {
-			MatchRequestDto matchRequestDto = new MatchRequestDto();
-			matchRequestDto.setSample(sample);
-			matchRequestDto.setGallery(gallery);
-			matchRequestDto.setModalitiesToMatch(modalitiesToMatch);
-			matchRequestDto.setFlags(flags);
+    /**
+     * Matches a biometric sample against a gallery of biometric records for specified modalities.
+     *
+     * @param sample The biometric sample to match.
+     * @param gallery Array of biometric records to match against.
+     * @param modalitiesToMatch List of biometric modalities to consider for matching.
+     * @param flags Additional configuration flags.
+     * @return A response containing an array of match decisions.
+     * @throws RuntimeException if parsing or processing of response fails.
+     */
+    @Override
+    public Response<MatchDecision[]> match(BiometricRecord sample, BiometricRecord[] gallery,
+                                           List<BiometricType> modalitiesToMatch, Map<String, String> flags) {
+        Response<MatchDecision[]> response = new Response<>();
+        try {
+            MatchRequestDto matchRequestDto = new MatchRequestDto();
+            matchRequestDto.setSample(sample);
+            matchRequestDto.setGallery(gallery);
+            matchRequestDto.setModalitiesToMatch(modalitiesToMatch);
+            matchRequestDto.setFlags(flags);
 
-			RequestDto requestDto = generateNewRequestDto(matchRequestDto);
-			String url = getSdkServiceUrl(modalitiesToMatch.get(0), flags)+"/match";
-			ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
-			if(!responseEntity.getStatusCode().is2xxSuccessful()){
-				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
-			}
-			String responseBody = responseEntity.getBody().toString();
-			JSONParser parser = new JSONParser();
-			JSONObject js = (JSONObject) parser.parse(responseBody);
+            RequestDto requestDto = generateNewRequestDto(matchRequestDto);
+            String url = getSdkServiceUrl(modalitiesToMatch.get(0), flags) + "/match";
+            ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
+            if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
+                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+            }
+            String responseBody = responseEntity.getBody().toString();
+            JSONParser parser = new JSONParser();
+            JSONObject js = (JSONObject) parser.parse(responseBody);
 
-			/* Error handler */
-			errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
+            /* Error handler */
+            errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-			JSONObject jsonResponse = (JSONObject) parser.parse(js.get("response").toString());
-			response.setStatusCode(
-					jsonResponse.get("statusCode") != null ? ((Long)jsonResponse.get("statusCode")).intValue() : null
-			);
-			response.setStatusMessage(
-					jsonResponse.get("statusMessage") != null ? jsonResponse.get("statusMessage").toString() : ""
-			);
-			response.setResponse(
-					jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), new TypeReference<MatchDecision[]>() {}) : null
-			);
-		} catch (ParseException e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error",  e);
-			throw new RuntimeException(e);
-		} catch (JsonProcessingException e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error",  e);
-			throw new RuntimeException(e);
-		}
-		return response;
-	}
+            JSONObject jsonResponse = (JSONObject) parser.parse(js.get("response").toString());
+            response.setStatusCode(
+                    jsonResponse.get("statusCode") != null ? ((Long) jsonResponse.get("statusCode")).intValue() : null
+            );
+            response.setStatusMessage(
+                    jsonResponse.get("statusMessage") != null ? jsonResponse.get("statusMessage").toString() : ""
+            );
+            response.setResponse(
+                    jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), new TypeReference<MatchDecision[]>() {
+                    }) : null
+            );
+        } catch (ParseException e) {
+            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
+            throw new RuntimeException(e);
+        } catch (JsonProcessingException e) {
+            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
+            throw new RuntimeException(e);
+        }
+        return response;
+    }
 
-	@Override
-	public Response<BiometricRecord> extractTemplate(BiometricRecord sample, List<BiometricType> modalitiesToExtract, Map<String, String> flags) {
-		Response<BiometricRecord> response = new Response<>();
-		try {
-			ExtractTemplateRequestDto extractTemplateRequestDto = new ExtractTemplateRequestDto();
-			extractTemplateRequestDto.setSample(sample);
-			extractTemplateRequestDto.setModalitiesToExtract(modalitiesToExtract);
-			extractTemplateRequestDto.setFlags(flags);
+    /**
+     * Extracts a biometric template from the provided biometric record for the given modalities.
+     *
+     * @param sample The biometric record from which the template needs to be extracted.
+     * @param modalitiesToExtract List of biometric modalities to extract templates for.
+     * @param flags Additional configuration flags that may influence the extraction process.
+     * @return A response containing the extracted biometric template.
+     * @throws RuntimeException if parsing or processing of response fails.
+     */
+    @Override
+    public Response<BiometricRecord> extractTemplate(BiometricRecord sample, List<BiometricType> modalitiesToExtract, Map<String, String> flags) {
+        Response<BiometricRecord> response = new Response<>();
+        try {
+            ExtractTemplateRequestDto extractTemplateRequestDto = new ExtractTemplateRequestDto();
+            extractTemplateRequestDto.setSample(sample);
+            extractTemplateRequestDto.setModalitiesToExtract(modalitiesToExtract);
+            extractTemplateRequestDto.setFlags(flags);
 
-			RequestDto requestDto = generateNewRequestDto(extractTemplateRequestDto);
-			String url = getSdkServiceUrl(modalitiesToExtract, flags)+"/extract-template";
-			ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
-			if(!responseEntity.getStatusCode().is2xxSuccessful()){
-				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
-			}
-			convertAndSetResponseObject(response, responseEntity);
+            RequestDto requestDto = generateNewRequestDto(extractTemplateRequestDto);
+            String url = getSdkServiceUrl(modalitiesToExtract, flags) + "/extract-template";
+            ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
+            if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
+                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+            }
+            convertAndSetResponseObject(response, responseEntity);
 
-		} catch (ParseException e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error",  e);
-			throw new RuntimeException(e);
-		} catch (JsonProcessingException e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error",  e);
-			throw new RuntimeException(e);
-		}
-		return response;
-	}
+        } catch (ParseException e) {
+            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
+            throw new RuntimeException(e);
+        } catch (JsonProcessingException e) {
+            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
+            throw new RuntimeException(e);
+        }
+        return response;
+    }
 
-	private String getSdkServiceUrl(List<BiometricType> modalitiesToExtract, Map<String, String> flags) {
-		if(modalitiesToExtract != null && !modalitiesToExtract.isEmpty()) {
-			return getSdkServiceUrl(modalitiesToExtract.get(0), flags);
-		} else {
-			Set<String> keySet = flags.keySet();
-			for(String key: keySet) {
-				if(key.toLowerCase().contains(BiometricType.FINGER.name().toLowerCase())) {
-					return getSdkServiceUrl(BiometricType.FINGER, flags);
-				} else if(key.toLowerCase().contains(BiometricType.IRIS.name().toLowerCase())) {
-					return getSdkServiceUrl(BiometricType.IRIS, flags);
-				} else if(key.toLowerCase().contains(BiometricType.FACE.name().toLowerCase())) {
-					return getSdkServiceUrl(BiometricType.FACE, flags);
-				}
-			}
-		}
-		return getDefaultSdkServiceUrl();
-	}
+    /**
+     * Retrieves the appropriate SDK service URL based on the modalities to extract and additional flags.
+     * Falls back to a default URL if no specific match is found.
+     *
+     * @param modalitiesToExtract List of biometric modalities for which template extraction is requested.
+     * @param flags A map of additional parameters to help determine the correct service URL.
+     * @return The resolved SDK service URL to use for template extraction.
+     */
+    private String getSdkServiceUrl(List<BiometricType> modalitiesToExtract, Map<String, String> flags) {
+        if (modalitiesToExtract != null && !modalitiesToExtract.isEmpty()) {
+            return getSdkServiceUrl(modalitiesToExtract.get(0), flags);
+        } else {
+            Set<String> keySet = flags.keySet();
+            for (String key : keySet) {
+                if (key.toLowerCase().contains(BiometricType.FINGER.name().toLowerCase())) {
+                    return getSdkServiceUrl(BiometricType.FINGER, flags);
+                } else if (key.toLowerCase().contains(BiometricType.IRIS.name().toLowerCase())) {
+                    return getSdkServiceUrl(BiometricType.IRIS, flags);
+                } else if (key.toLowerCase().contains(BiometricType.FACE.name().toLowerCase())) {
+                    return getSdkServiceUrl(BiometricType.FACE, flags);
+                }
+            }
+        }
+        return getDefaultSdkServiceUrl();
+    }
 
-	@Override
-	public Response<BiometricRecord> segment(BiometricRecord biometricRecord, List<BiometricType> modalitiesToSegment, Map<String, String> flags) {
-		Response<BiometricRecord> response = new Response<>();
-		try {
-			SegmentRequestDto segmentRequestDto = new SegmentRequestDto();
-			segmentRequestDto.setSample(biometricRecord);
-			segmentRequestDto.setModalitiesToSegment(modalitiesToSegment);
-			segmentRequestDto.setFlags(flags);
+    /**
+     * Segments the given biometric record based on the specified modalities and configuration flags.
+     *
+     * @param biometricRecord The biometric record to be segmented.
+     * @param modalitiesToSegment List of biometric modalities to perform segmentation on.
+     * @param flags Additional configuration flags that may influence the segmentation process.
+     * @return A response containing the segmented biometric record.
+     * @throws RuntimeException if parsing or processing of the response fails.
+     */
+    @Override
+    public Response<BiometricRecord> segment(BiometricRecord biometricRecord, List<BiometricType> modalitiesToSegment, Map<String, String> flags) {
+        Response<BiometricRecord> response = new Response<>();
+        try {
+            SegmentRequestDto segmentRequestDto = new SegmentRequestDto();
+            segmentRequestDto.setSample(biometricRecord);
+            segmentRequestDto.setModalitiesToSegment(modalitiesToSegment);
+            segmentRequestDto.setFlags(flags);
 
-			RequestDto requestDto = generateNewRequestDto(segmentRequestDto);
-			String url = getSdkServiceUrl(modalitiesToSegment.get(0), flags)+"/segment";
-			ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
-			if(!responseEntity.getStatusCode().is2xxSuccessful()){
-				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
-			}
-			convertAndSetResponseObject(response, responseEntity);
-		} catch (ParseException | JsonProcessingException e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error",  e);
-			throw new RuntimeException(e);
-		}
-		return response;
-	}
+            RequestDto requestDto = generateNewRequestDto(segmentRequestDto);
+            String url = getSdkServiceUrl(modalitiesToSegment.get(0), flags) + "/segment";
+            ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
+            if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
+                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+            }
+            convertAndSetResponseObject(response, responseEntity);
+        } catch (ParseException | JsonProcessingException e) {
+            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
+            throw new RuntimeException(e);
+        }
+        return response;
+    }
 
-	private void convertAndSetResponseObject(Response<BiometricRecord> response, ResponseEntity<?> responseEntity) throws ParseException, JsonProcessingException {
-		String responseBody = responseEntity.getBody().toString();
-		JSONParser parser = new JSONParser();
-		JSONObject js = (JSONObject) parser.parse(responseBody);
+    /**
+     * Converts the HTTP response entity into a {@link Response} object containing a {@link BiometricRecord}.
+     * Extracts status codes, messages, and parsed biometric record information from the response.
+     *
+     * @param response The response object to populate with parsed data.
+     * @param responseEntity The raw HTTP response entity received from the service call.
+     * @throws ParseException If there is an error while parsing the JSON response body.
+     * @throws JsonProcessingException If the JSON mapping fails during response conversion.
+     */
+    private void convertAndSetResponseObject(Response<BiometricRecord> response, ResponseEntity<?> responseEntity) throws ParseException, JsonProcessingException {
+        String responseBody = responseEntity.getBody().toString();
+        JSONParser parser = new JSONParser();
+        JSONObject js = (JSONObject) parser.parse(responseBody);
 
-		/* Error handler */
-		errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
+        /* Error handler */
+        errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-		JSONObject jsonResponse = (JSONObject) parser.parse(js.get("response").toString());
-		response.setStatusCode(
-				jsonResponse.get("statusCode") != null ? ((Long)jsonResponse.get("statusCode")).intValue() : null
-		);
-		response.setStatusMessage(
-				jsonResponse.get("statusMessage") != null ? jsonResponse.get("statusMessage").toString() : ""
-		);
-		response.setResponse(
-				jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), new TypeReference<BiometricRecord>() {}) : null
-		);
-	}
+        JSONObject jsonResponse = (JSONObject) parser.parse(js.get("response").toString());
+        response.setStatusCode(
+                jsonResponse.get("statusCode") != null ? ((Long) jsonResponse.get("statusCode")).intValue() : null
+        );
+        response.setStatusMessage(
+                jsonResponse.get("statusMessage") != null ? jsonResponse.get("statusMessage").toString() : ""
+        );
+        response.setResponse(
+                jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), new TypeReference<BiometricRecord>() {
+                }) : null
+        );
+    }
 
-	@Override
-	@Deprecated
-	public BiometricRecord convertFormat(BiometricRecord sample, String sourceFormat, String targetFormat,
-										 Map<String, String> sourceParams, Map<String, String> targetParams, List<BiometricType> modalitiesToConvert) {
-		BiometricRecord resBiometricRecord = null;
-		try {
-			ConvertFormatRequestDto convertFormatRequestDto = new ConvertFormatRequestDto();
-			convertFormatRequestDto.setSample(sample);
-			convertFormatRequestDto.setSourceFormat(sourceFormat);
-			convertFormatRequestDto.setTargetFormat(targetFormat);
-			convertFormatRequestDto.setSourceParams(sourceParams);
-			convertFormatRequestDto.setTargetParams(targetParams);
-			convertFormatRequestDto.setModalitiesToConvert(modalitiesToConvert);
+    /**
+     * Converts biometric data format from sourceFormat to targetFormat using provided parameters.
+     * This method is deprecated and replaced by {@link #convertFormatV2}.
+     *
+     * @param sample The biometric record to be converted.
+     * @param sourceFormat Source format of the biometric data.
+     * @param targetFormat Target format of the biometric data.
+     * @param sourceParams Additional source format parameters.
+     * @param targetParams Additional target format parameters.
+     * @param modalitiesToConvert List of biometric modalities to be converted.
+     * @return Converted {@link BiometricRecord}.
+     * @throws RuntimeException if parsing or processing of the response fails.
+     */
+    @Override
+    @Deprecated
+    public BiometricRecord convertFormat(BiometricRecord sample, String sourceFormat, String targetFormat,
+                                         Map<String, String> sourceParams, Map<String, String> targetParams, List<BiometricType> modalitiesToConvert) {
+        BiometricRecord resBiometricRecord = null;
+        try {
+            ConvertFormatRequestDto convertFormatRequestDto = new ConvertFormatRequestDto();
+            convertFormatRequestDto.setSample(sample);
+            convertFormatRequestDto.setSourceFormat(sourceFormat);
+            convertFormatRequestDto.setTargetFormat(targetFormat);
+            convertFormatRequestDto.setSourceParams(sourceParams);
+            convertFormatRequestDto.setTargetParams(targetParams);
+            convertFormatRequestDto.setModalitiesToConvert(modalitiesToConvert);
 
-			RequestDto requestDto = generateNewRequestDto(convertFormatRequestDto);
-			String url = getDefaultSdkServiceUrl()+"/convert-format";
-			ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
-			if(!responseEntity.getStatusCode().is2xxSuccessful()){
-				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
-			}
-			String responseBody = responseEntity.getBody().toString();
-			JSONParser parser = new JSONParser();
-			JSONObject js = (JSONObject) parser.parse(responseBody);
+            RequestDto requestDto = generateNewRequestDto(convertFormatRequestDto);
+            String url = getDefaultSdkServiceUrl() + "/convert-format";
+            ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
+            if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
+                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+            }
+            String responseBody = responseEntity.getBody().toString();
+            JSONParser parser = new JSONParser();
+            JSONObject js = (JSONObject) parser.parse(responseBody);
 
-			/* Error handler */
-			errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
+            /* Error handler */
+            errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-			resBiometricRecord = Util.getObjectMapper().readValue(js.get("response").toString(), new TypeReference<BiometricRecord>() {});
-		} catch (ParseException | JsonProcessingException e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error",  e);
-			throw new RuntimeException(e);
-		}
-		return resBiometricRecord;
-	}
+            resBiometricRecord = Util.getObjectMapper().readValue(js.get("response").toString(), new TypeReference<BiometricRecord>() {
+            });
+        } catch (ParseException | JsonProcessingException e) {
+            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
+            throw new RuntimeException(e);
+        }
+        return resBiometricRecord;
+    }
 
-	@Override
-	public Response<BiometricRecord> convertFormatV2(BiometricRecord sample, String sourceFormat, String targetFormat,
-													 Map<String, String> sourceParams, Map<String, String> targetParams,
-													 List<BiometricType> modalitiesToConvert) {
-		Response<BiometricRecord> response = new Response<>();
-		try {
-			ConvertFormatRequestDto convertFormatRequestDto = new ConvertFormatRequestDto();
-			convertFormatRequestDto.setSample(sample);
-			convertFormatRequestDto.setSourceFormat(sourceFormat);
-			convertFormatRequestDto.setTargetFormat(targetFormat);
-			convertFormatRequestDto.setSourceParams(sourceParams);
-			convertFormatRequestDto.setTargetParams(targetParams);
-			convertFormatRequestDto.setModalitiesToConvert(modalitiesToConvert);
+    /**
+     * Converts biometric data format from sourceFormat to targetFormat using provided parameters.
+     * Returns a Response object containing status, message, and converted record.
+     *
+     * @param sample The biometric record to be converted.
+     * @param sourceFormat Source format of the biometric data.
+     * @param targetFormat Target format of the biometric data.
+     * @param sourceParams Additional source format parameters.
+     * @param targetParams Additional target format parameters.
+     * @param modalitiesToConvert List of biometric modalities to be converted.
+     * @return Response containing converted {@link BiometricRecord} and status information.
+     * @throws RuntimeException if parsing or processing of the response fails.
+     */
+    @Override
+    public Response<BiometricRecord> convertFormatV2(BiometricRecord sample, String sourceFormat, String targetFormat,
+                                                     Map<String, String> sourceParams, Map<String, String> targetParams,
+                                                     List<BiometricType> modalitiesToConvert) {
+        Response<BiometricRecord> response = new Response<>();
+        try {
+            ConvertFormatRequestDto convertFormatRequestDto = new ConvertFormatRequestDto();
+            convertFormatRequestDto.setSample(sample);
+            convertFormatRequestDto.setSourceFormat(sourceFormat);
+            convertFormatRequestDto.setTargetFormat(targetFormat);
+            convertFormatRequestDto.setSourceParams(sourceParams);
+            convertFormatRequestDto.setTargetParams(targetParams);
+            convertFormatRequestDto.setModalitiesToConvert(modalitiesToConvert);
 
-			RequestDto requestDto = generateNewRequestDto(convertFormatRequestDto);
-			String url = getDefaultSdkServiceUrl()+"/convert-format";
-			ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
-			if(!responseEntity.getStatusCode().is2xxSuccessful()){
-				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
-				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
-			}
-			String responseBody = responseEntity.getBody().toString();
-			convertAndSetResponseObject(response, responseBody, new TypeReference<BiometricRecord>() {});
-		} catch (ParseException e) {
-			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error",  e);
-			throw new RuntimeException(e);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-		return response;
-	}
+            RequestDto requestDto = generateNewRequestDto(convertFormatRequestDto);
+            String url = getDefaultSdkServiceUrl() + "/convert-format";
+            ResponseEntity<?> responseEntity = Util.restRequest(url, HttpMethod.POST, MediaType.APPLICATION_JSON, requestDto, null, String.class);
+            if (!responseEntity.getStatusCode().is2xxSuccessful()) {
+                logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
+                throw new RuntimeException("HTTP status: " + responseEntity.getStatusCode().toString());
+            }
+            String responseBody = responseEntity.getBody().toString();
+            convertAndSetResponseObject(response, responseBody, new TypeReference<BiometricRecord>() {
+            });
+        } catch (ParseException e) {
+            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
+            throw new RuntimeException(e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        return response;
+    }
 
-	private <T> void convertAndSetResponseObject(Response<T> response, String responseBody, TypeReference<T> type) throws ParseException, JsonProcessingException {
-		JSONParser parser = new JSONParser();
-		JSONObject js = (JSONObject) parser.parse(responseBody);
+    /**
+     * Converts the raw JSON response body into a {@link Response} object of the specified type.
+     * Extracts status codes, messages, and parsed data into the response object.
+     *
+     * @param <T> The type of the response data.
+     * @param response The response object to populate with parsed data.
+     * @param responseBody The raw JSON response string.
+     * @param type The type reference to map the JSON response data.
+     * @throws ParseException If there is an error while parsing the JSON response body.
+     * @throws JsonProcessingException If the JSON mapping fails during response conversion.
+     */
+    private <T> void convertAndSetResponseObject(Response<T> response, String responseBody, TypeReference<T> type) throws ParseException, JsonProcessingException {
+        JSONParser parser = new JSONParser();
+        JSONObject js = (JSONObject) parser.parse(responseBody);
 
-		/* Error handler */
-		errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
+        /* Error handler */
+        errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-		JSONObject jsonResponse = (JSONObject) parser.parse(js.get("response").toString());
-		response.setStatusCode(
-				jsonResponse.get("statusCode") != null ? ((Long)jsonResponse.get("statusCode")).intValue() : null
-		);
-		response.setStatusMessage(
-				jsonResponse.get("statusMessage") != null ? jsonResponse.get("statusMessage").toString() : ""
-		);
-		response.setResponse(
-				jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), type) : null
-		);
-	}
+        JSONObject jsonResponse = (JSONObject) parser.parse(js.get("response").toString());
+        response.setStatusCode(
+                jsonResponse.get("statusCode") != null ? ((Long) jsonResponse.get("statusCode")).intValue() : null
+        );
+        response.setStatusMessage(
+                jsonResponse.get("statusMessage") != null ? jsonResponse.get("statusMessage").toString() : ""
+        );
+        response.setResponse(
+                jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), type) : null
+        );
+    }
 
-	private RequestDto generateNewRequestDto(Object body) throws JsonProcessingException {
-		RequestDto requestDto = new RequestDto();
-		requestDto.setVersion(VERSION);
-		requestDto.setRequest(Util.base64Encode(Util.getObjectMapper().writeValueAsString(body)));
-		return requestDto;
-	}
+    /**
+     * Generates a new {@link RequestDto} object by encoding the provided body as a Base64 string.
+     * This ensures that the request payload is safely encoded before sending to the SDK service.
+     *
+     * @param body The request body object to encode.
+     * @return A new {@link RequestDto} containing the encoded request.
+     * @throws JsonProcessingException If the object cannot be converted to a JSON string.
+     */
+    private RequestDto generateNewRequestDto(Object body) throws JsonProcessingException {
+        RequestDto requestDto = new RequestDto();
+        requestDto.setVersion(VERSION);
+        requestDto.setRequest(Util.base64Encode(Util.getObjectMapper().writeValueAsString(body)));
+        return requestDto;
+    }
 
-	private void errorHandler(List<ErrorDto> errors){
-		if(errors != null){
-			for (ErrorDto errorDto: errors){
-				throw new RuntimeException(errorDto.getCode()+" ---> "+errorDto.getMessage());
-			}
-		}
-	}
+    /**
+     * Handles and processes a list of {@link ErrorDto} objects.
+     * If any errors are present, this method throws a {@link RuntimeException}
+     * containing the first error code and message for easier debugging and tracking.
+     *
+     * @param errors The list of {@link ErrorDto} objects returned from the SDK service.
+     * @throws RuntimeException If one or more errors are present in the list.
+     */
+    private void errorHandler(List<ErrorDto> errors) {
+        if (errors != null) {
+            for (ErrorDto errorDto : errors) {
+                throw new RuntimeException(errorDto.getCode() + " ---> " + errorDto.getMessage());
+            }
+        }
+    }
 }
