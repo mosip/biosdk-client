@@ -7,8 +7,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import io.mosip.biosdk.client.config.LoggerConfig;
-import io.mosip.kernel.biometrics.entities.ByteArrayToIntArraySerializer;
-import io.mosip.kernel.biometrics.entities.IntArrayToByteArrayDeserializer;
 import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.logger.spi.Logger;
 import org.apache.commons.lang3.BooleanUtils;
@@ -49,8 +47,6 @@ public class Util {
     public static ObjectMapper getObjectMapper() {
         if(mapper == null) {
             SimpleModule module = new SimpleModule();
-            module.addSerializer(byte[].class, new ByteArrayToIntArraySerializer());
-            module.addDeserializer(byte[].class, new IntArrayToByteArrayDeserializer());
             mapper = new ObjectMapper();
             mapper.registerModule(new AfterburnerModule());
             mapper.registerModule(module);
