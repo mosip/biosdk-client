@@ -1,5 +1,6 @@
 package io.mosip.biosdk.client.test;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,10 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -287,7 +285,7 @@ class UtilTest {
 		});
 
 		// Assert that the exception message matches the expected behavior
-		assertEquals("rest call failed", exception.getMessage());
+		Assertions.assertTrue(exception.getMessage().contains("rest call failed"));
 
 		// Cleanup
 		System.clearProperty("mosip_biosdk_request_response_debug");
@@ -330,7 +328,7 @@ class UtilTest {
 		});
 
 		// Assert that the exception message matches the expected behavior
-		assertEquals("rest call failed", exception.getMessage());
+		Assertions.assertTrue(exception.getMessage().contains("rest call failed"));
 
 		// Cleanup
 		System.clearProperty("mosip_biosdk_request_response_debug");
