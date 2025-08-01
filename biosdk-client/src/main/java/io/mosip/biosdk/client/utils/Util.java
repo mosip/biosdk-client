@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import io.mosip.biosdk.client.config.LoggerConfig;
 import io.mosip.kernel.core.exception.ExceptionUtils;
@@ -46,10 +45,8 @@ public class Util {
 
     public static ObjectMapper getObjectMapper() {
         if(mapper == null) {
-            SimpleModule module = new SimpleModule();
             mapper = new ObjectMapper();
             mapper.registerModule(new AfterburnerModule());
-            mapper.registerModule(module);
             mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
             mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
             mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
