@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.mosip.biosdk.client.dto.RequestDto;
+import io.mosip.biosdk.client.utils.Util;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +50,7 @@ class Client_V_1_0Test {
 	@BeforeAll
 	public static void startWebServerConnection() throws IOException {
 		mockWebServer = new MockWebServer();
-		mockWebServer.start(InetAddress.getLoopbackAddress(), 9099);
+		mockWebServer.start(InetAddress.getLoopbackAddress(), 9098); //Orginal 9099
 	}
 
 	@AfterAll
@@ -579,4 +581,16 @@ class Client_V_1_0Test {
     private void clearSystemProperty(String key) {
         System.clearProperty(key);
     }
+
+	private RequestDto generateNewRequestDto(Object body) {
+		RequestDto requestDto = new RequestDto();
+		try {
+			String jsonBody = Util.getObjectMapper().writeValueAsString(body);
+			requestDto.setVersion("1.0");
+			requestDto.setRequest(Util.base64Encode(jsonBody));
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to serialize request body", e);
+		}
+		return requestDto;
+	}
 }
