@@ -40,7 +40,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 class UtilTest {
 	private static Logger logger = LoggerConfig.logConfig(UtilTest.class);
 
-	String url = "http://localhost:9099/biosdk-service/init";
+	String url = "http://localhost:9098/biosdk-service/init"; //Orginal 9099
 
 	private static MockWebServer mockWebServer;
 
@@ -55,10 +55,10 @@ class UtilTest {
 	@BeforeAll
 	public static void startWebServerConnection() throws IOException {
 		mockWebServer = new MockWebServer();
-		mockWebServer.start(InetAddress.getLoopbackAddress(), 9099);
+		mockWebServer.start(InetAddress.getLoopbackAddress(), 9098);
 
 		// Set environment variable for sdk url
-		System.setProperty("mosip_biosdk_service", "http://localhost:9099/biosdk-service");
+		System.setProperty("mosip_biosdk_service", "http://localhost:9098/biosdk-service");
 	}
 
 	@AfterAll
@@ -84,7 +84,7 @@ class UtilTest {
 
 		InitRequestDto initRequestDto = new InitRequestDto();
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		initRequestDto.setInitParams(initParams); // Set initialization params
 
@@ -127,7 +127,7 @@ class UtilTest {
 
 		InitRequestDto initRequestDto = new InitRequestDto();
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 		
 		initRequestDto.setInitParams(initParams); // Set initialization params
 		RequestDto requestDto = generateNewRequestDto(initRequestDto);
@@ -179,7 +179,7 @@ class UtilTest {
 
 		InitRequestDto initRequestDto = new InitRequestDto();
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		initRequestDto.setInitParams(initParams); // Set initialization params
 		RequestDto requestDto = generateNewRequestDto(initRequestDto);
@@ -225,7 +225,7 @@ class UtilTest {
 
 		InitRequestDto initRequestDto = new InitRequestDto();
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		initRequestDto.setInitParams(initParams); // Set initialization params
 		RequestDto requestDto = generateNewRequestDto(initRequestDto);
@@ -336,8 +336,13 @@ class UtilTest {
 
 	private RequestDto generateNewRequestDto(Object body) {
 		RequestDto requestDto = new RequestDto();
-		requestDto.setVersion("1.0");
-		requestDto.setRequest(Util.base64Encode(gson.toJson(body)));
+		try {
+			String jsonBody = Util.getObjectMapper().writeValueAsString(body);
+			requestDto.setVersion("1.0");
+			requestDto.setRequest(Util.base64Encode(jsonBody));
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to serialize request body", e);
+		}
 		return requestDto;
 	}
 }
