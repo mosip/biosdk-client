@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.mosip.biosdk.client.dto.RequestDto;
+import io.mosip.biosdk.client.utils.Util;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +50,7 @@ class Client_V_1_0Test {
 	@BeforeAll
 	public static void startWebServerConnection() throws IOException {
 		mockWebServer = new MockWebServer();
-		mockWebServer.start(InetAddress.getLoopbackAddress(), 9099);
+		mockWebServer.start(InetAddress.getLoopbackAddress(), 9098); //Orginal 9099
 	}
 
 	@AfterAll
@@ -76,7 +78,7 @@ class Client_V_1_0Test {
 		Client_V_1_0 client = new Client_V_1_0();
 
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 		    @Override
@@ -114,7 +116,7 @@ class Client_V_1_0Test {
 
 		// Execute the init method
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		// Mock response for /biosdk-service/init
 		mockWebServer.setDispatcher(new Dispatcher() {
@@ -193,7 +195,7 @@ class Client_V_1_0Test {
 
 		// Execute the init method
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 		
 		mockWebServer.setDispatcher(new Dispatcher() {
 		    @Override
@@ -271,7 +273,7 @@ class Client_V_1_0Test {
 
 		// Execute the init method
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 		    @Override
@@ -346,7 +348,7 @@ class Client_V_1_0Test {
 
 		// Execute the init method
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 		    @Override
@@ -536,7 +538,7 @@ class Client_V_1_0Test {
         Client_V_1_0 client = new Client_V_1_0();
 
         // Set system property for MOSIP_BIOSDK_SERVICE
-        setSystemProperty("mosip_biosdk_service", "http://localhost:9099");
+        setSystemProperty("mosip_biosdk_service", "http://localhost:9098");
 
         // Use reflection to access the private method
         Method method = Client_V_1_0.class.getDeclaredMethod("getDefaultSdkServiceUrlFromEnv");
@@ -546,7 +548,7 @@ class Client_V_1_0Test {
         String result = (String) method.invoke(client);
 
         // Assert that the system property value is returned
-        assertEquals("http://localhost:9099", result);
+        assertEquals("http://localhost:9098", result);
 
         // Clear the system property after the test
         clearSystemProperty("mosip_biosdk_service");
@@ -579,4 +581,16 @@ class Client_V_1_0Test {
     private void clearSystemProperty(String key) {
         System.clearProperty(key);
     }
+
+	private RequestDto generateNewRequestDto(Object body) {
+		RequestDto requestDto = new RequestDto();
+		try {
+			String jsonBody = Util.getObjectMapper().writeValueAsString(body);
+			requestDto.setVersion("1.0");
+			requestDto.setRequest(Util.base64Encode(jsonBody));
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to serialize request body", e);
+		}
+		return requestDto;
+	}
 }
