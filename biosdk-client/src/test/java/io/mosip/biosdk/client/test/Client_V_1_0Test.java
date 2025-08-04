@@ -78,7 +78,7 @@ class Client_V_1_0Test {
 		Client_V_1_0 client = new Client_V_1_0();
 
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 		    @Override
@@ -116,7 +116,7 @@ class Client_V_1_0Test {
 
 		// Execute the init method
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		// Mock response for /biosdk-service/init
 		mockWebServer.setDispatcher(new Dispatcher() {
@@ -195,7 +195,7 @@ class Client_V_1_0Test {
 
 		// Execute the init method
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 		
 		mockWebServer.setDispatcher(new Dispatcher() {
 		    @Override
@@ -273,7 +273,7 @@ class Client_V_1_0Test {
 
 		// Execute the init method
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 		    @Override
@@ -348,7 +348,7 @@ class Client_V_1_0Test {
 
 		// Execute the init method
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 		    @Override
@@ -538,7 +538,7 @@ class Client_V_1_0Test {
         Client_V_1_0 client = new Client_V_1_0();
 
         // Set system property for MOSIP_BIOSDK_SERVICE
-        setSystemProperty("mosip_biosdk_service", "http://localhost:9099");
+        setSystemProperty("mosip_biosdk_service", "http://localhost:9098");
 
         // Use reflection to access the private method
         Method method = Client_V_1_0.class.getDeclaredMethod("getDefaultSdkServiceUrlFromEnv");
@@ -548,7 +548,7 @@ class Client_V_1_0Test {
         String result = (String) method.invoke(client);
 
         // Assert that the system property value is returned
-        assertEquals("http://localhost:9099", result);
+        assertEquals("http://localhost:9098", result);
 
         // Clear the system property after the test
         clearSystemProperty("mosip_biosdk_service");
