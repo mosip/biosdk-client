@@ -143,7 +143,11 @@ public class Client_V_1_0 implements IBioApiV2 {
 				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
 				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
 			}
-			String responseBody = responseEntity.getBody().toString();
+			Object body = responseEntity.getBody();
+			if (body == null) {
+				throw new NullPointerException("Response body is null");
+			}
+			String responseBody = body.toString();
             JSONParser parser = new JSONParser();
 			JSONObject js = (JSONObject) parser.parse(responseBody);
 
@@ -151,12 +155,10 @@ public class Client_V_1_0 implements IBioApiV2 {
             errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
 			sdkInfo = Util.getObjectMapper().readValue(js.get("response").toString(), new TypeReference<SDKInfo>() {});
-		} catch (ParseException e) {
-			e.printStackTrace();
+		} catch (ParseException | JsonProcessingException e) {
+			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
 			throw new RuntimeException(e);
-		} catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+		}
         return sdkInfo;
 	}
 
@@ -237,7 +239,11 @@ public class Client_V_1_0 implements IBioApiV2 {
 				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
 				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
 			}
-			String responseBody = responseEntity.getBody().toString();
+			Object body = responseEntity.getBody();
+			if (body == null) {
+				throw new NullPointerException("Response body is null");
+			}
+			String responseBody = body.toString();
 			JSONParser parser = new JSONParser();
 			JSONObject js = (JSONObject) parser.parse(responseBody);
 			JSONObject responseJson =(JSONObject)  ((JSONObject) js.get("response")).get("response");
@@ -247,7 +253,7 @@ public class Client_V_1_0 implements IBioApiV2 {
 
 			qualityCheck = Util.getObjectMapper().readValue(responseJson.toString(), new TypeReference<QualityCheck>() {});
 		} catch (ParseException | JsonProcessingException e) {
-			e.printStackTrace();
+			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
 			throw new RuntimeException(e);
 		}
 		response.setResponse(qualityCheck);
@@ -273,7 +279,11 @@ public class Client_V_1_0 implements IBioApiV2 {
 				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
 				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
 			}
-			String responseBody = responseEntity.getBody().toString();
+			Object body = responseEntity.getBody();
+			if (body == null) {
+				throw new NullPointerException("Response body is null");
+			}
+			String responseBody = body.toString();
 			JSONParser parser = new JSONParser();
 			JSONObject js = (JSONObject) parser.parse(responseBody);
 
@@ -290,12 +300,10 @@ public class Client_V_1_0 implements IBioApiV2 {
 			response.setResponse(
 					jsonResponse.get("response") != null ? Util.getObjectMapper().readValue(jsonResponse.get("response").toString(), new TypeReference<MatchDecision[]>() {}) : null
 			);
-		} catch (ParseException e) {
-			e.printStackTrace();
+		} catch (ParseException | JsonProcessingException e) {
+			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
 			throw new RuntimeException(e);
-		} catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+		}
         return response;
 	}
 
@@ -318,12 +326,10 @@ public class Client_V_1_0 implements IBioApiV2 {
 			}
 			convertAndSetResponseObject(response, responseEntity);
 
-		} catch (ParseException e) {
-			e.printStackTrace();
+		} catch (ParseException | JsonProcessingException e) {
+			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
 			throw new RuntimeException(e);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+		}
         return response;
 	}
 
@@ -364,14 +370,18 @@ public class Client_V_1_0 implements IBioApiV2 {
 			}
 			convertAndSetResponseObject(response, responseEntity);
 		} catch (ParseException | JsonProcessingException e) {
-			e.printStackTrace();
+			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
 			throw new RuntimeException(e);
 		}
 		return response;
 	}
 
 	private void convertAndSetResponseObject(Response<BiometricRecord> response, ResponseEntity<?> responseEntity) throws ParseException, JsonProcessingException {
-		String responseBody = responseEntity.getBody().toString();
+		Object body = responseEntity.getBody();
+		if (body == null) {
+			throw new NullPointerException("Response body is null");
+		}
+		String responseBody = body.toString();
 		JSONParser parser = new JSONParser();
 		JSONObject js = (JSONObject) parser.parse(responseBody);
 
@@ -412,7 +422,11 @@ public class Client_V_1_0 implements IBioApiV2 {
 				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
 				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
 			}
-			String responseBody = responseEntity.getBody().toString();
+			Object body = responseEntity.getBody();
+			if (body == null) {
+				throw new NullPointerException("Response body is null");
+			}
+			String responseBody = body.toString();
 			JSONParser parser = new JSONParser();
 			JSONObject js = (JSONObject) parser.parse(responseBody);
 
@@ -421,7 +435,7 @@ public class Client_V_1_0 implements IBioApiV2 {
 
 			resBiometricRecord = Util.getObjectMapper().readValue(js.get("response").toString(), new TypeReference<BiometricRecord>() {});
 		} catch (ParseException | JsonProcessingException e) {
-			e.printStackTrace();
+			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
 			throw new RuntimeException(e);
 		}
 		return resBiometricRecord;
@@ -449,14 +463,16 @@ public class Client_V_1_0 implements IBioApiV2 {
 				logger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "HTTP status: ", responseEntity.getStatusCode().toString());
 				throw new RuntimeException("HTTP status: "+responseEntity.getStatusCode().toString());
 			}
-			String responseBody = responseEntity.getBody().toString();
+			Object body = responseEntity.getBody();
+			if (body == null) {
+				throw new NullPointerException("Response body is null");
+			}
+			String responseBody = body.toString();
 			convertAndSetResponseObject(response, responseBody, new TypeReference<BiometricRecord>() {});
-		} catch (ParseException e) {
-			e.printStackTrace();
+		} catch (ParseException | JsonProcessingException e) {
+			logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
 			throw new RuntimeException(e);
-		} catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+		}
             return response;
 	}
 
@@ -486,13 +502,17 @@ public class Client_V_1_0 implements IBioApiV2 {
 		requestDto.setRequest(Util.base64Encode(Util.getObjectMapper().writeValueAsString(body)));
 		return requestDto;
 	}
-	
-	private void errorHandler(List<ErrorDto> errors){
-	    if(errors != null){
-	        for (ErrorDto errorDto: errors){
-                throw new RuntimeException(errorDto.getCode()+" ---> "+errorDto.getMessage());
-            }
-        }
-    }
 
+	private void errorHandler(List<ErrorDto> errors) {
+		if (errors != null && !errors.isEmpty()) {
+			StringBuilder errorMessage = new StringBuilder("Errors encountered:\n");
+			for (ErrorDto errorDto : errors) {
+				errorMessage.append(errorDto.getCode())
+						.append(" ---> ")
+						.append(errorDto.getMessage())
+						.append("\n");
+			}
+			throw new RuntimeException(errorMessage.toString());
+		}
+	}
 }
