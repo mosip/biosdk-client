@@ -13,14 +13,14 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContexts;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -81,11 +81,9 @@ public class Util {
             if(debugRequestResponse != null && debugRequestResponse.equalsIgnoreCase("y")){
                 utilLogger.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "Response: ", getObjectMapper().writeValueAsString(response.getBody()));
             }
-        } catch (RestClientException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException ex) {
-            ex.printStackTrace();
+        } catch (RestClientException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException | JsonProcessingException ex) {
+            utilLogger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error: ", ex);
             throw new RestClientException("rest call failed" + ExceptionUtils.getStackTrace(ex));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
         }
         return response;
 
@@ -101,11 +99,9 @@ public class Util {
                 TrustStrategy acceptingTrustStrategy = (X509Certificate[] chain, String authType) -> true;
                 SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
                         .loadTrustMaterial(null, acceptingTrustStrategy).build();
-                SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(sslContext, new HostnameVerifier() {
-                    public boolean verify(String arg0, SSLSession arg1) {
-                        return true;
-                    }
-                });
+                SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(SSLContexts.createSystemDefault(),
+                        new DefaultHostnameVerifier());
+
                 httpClientBuilder.setSSLSocketFactory(csf);
             }
             HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
