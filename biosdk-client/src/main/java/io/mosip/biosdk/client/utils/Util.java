@@ -10,6 +10,7 @@ import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.logger.spi.Logger;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -153,7 +154,13 @@ public class Util {
                         .setMaxConnTotal(getTotalMaxConnectionsFromEnv())
                         .build();
             } else {
+                SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(
+                        SSLContexts.createSystemDefault(),
+                        new DefaultHostnameVerifier()
+                );
+
                 connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                        .setSSLSocketFactory(csf)
                         .setMaxConnPerRoute(getMaxConnectionPerRouteFromEnv())
                         .setMaxConnTotal(getTotalMaxConnectionsFromEnv())
                         .build();

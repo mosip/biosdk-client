@@ -179,7 +179,11 @@ public class Client_V_1_0 implements IBioApiV2 {
                 throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR + "",
                         TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
             }
-            String responseBody = responseEntity.getBody().toString();
+            Object body = responseEntity.getBody();
+            if (body == null) {
+                throw new NullPointerException("Response body is null");
+            }
+            String responseBody = body.toString();
             JSONParser parser = new JSONParser();
             JSONObject js = (JSONObject) parser.parse(responseBody);
 
@@ -188,10 +192,7 @@ public class Client_V_1_0 implements IBioApiV2 {
 
             sdkInfo = Util.getObjectMapper().readValue(js.get("response").toString(), new TypeReference<SDKInfo>() {
             });
-        } catch (ParseException e) {
-            logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
-            throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR + "", e.getLocalizedMessage(), e);
-        } catch (JsonProcessingException e) {
+        } catch (Exception  e) {
             logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
             throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR + "", e.getLocalizedMessage(), e);
         }
@@ -313,7 +314,11 @@ public class Client_V_1_0 implements IBioApiV2 {
                 throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "",
                         TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
             }
-            String responseBody = responseEntity.getBody().toString();
+            Object body = responseEntity.getBody();
+            if (body == null) {
+                throw new NullPointerException("Response body is null");
+            }
+            String responseBody = body.toString();
             JSONParser parser = new JSONParser();
             JSONObject js = (JSONObject) parser.parse(responseBody);
             JSONObject responseJson = (JSONObject) ((JSONObject) js.get("response")).get("response");
@@ -361,7 +366,11 @@ public class Client_V_1_0 implements IBioApiV2 {
                 throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR + "",
                         TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
             }
-            String responseBody = responseEntity.getBody().toString();
+            Object body = responseEntity.getBody();
+            if (body == null) {
+                throw new NullPointerException("Response body is null");
+            }
+            String responseBody = body.toString();
             JSONParser parser = new JSONParser();
             JSONObject js = (JSONObject) parser.parse(responseBody);
 
@@ -494,7 +503,11 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @throws BioSdkClientException  If the JSON mapping fails during response conversion.
      */
     private void convertAndSetResponseObject(Response<BiometricRecord> response, ResponseEntity<?> responseEntity) throws ParseException, JsonProcessingException {
-        String responseBody = responseEntity.getBody().toString();
+        Object body = responseEntity.getBody();
+        if (body == null) {
+            throw new NullPointerException("Response body is null");
+        }
+        String responseBody = body.toString();
         JSONParser parser = new JSONParser();
         JSONObject js = (JSONObject) parser.parse(responseBody);
 
@@ -549,7 +562,11 @@ public class Client_V_1_0 implements IBioApiV2 {
                 throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "",
                         TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
             }
-            String responseBody = responseEntity.getBody().toString();
+            Object body = responseEntity.getBody();
+            if (body == null) {
+                throw new NullPointerException("Response body is null");
+            }
+            String responseBody = body.toString();
             JSONParser parser = new JSONParser();
             JSONObject js = (JSONObject) parser.parse(responseBody);
 
@@ -601,7 +618,11 @@ public class Client_V_1_0 implements IBioApiV2 {
                 throw new BioSdkClientException(ResponseStatus.UNKNOWN_ERROR.getStatusCode() + "",
                         TAG_HTTP_STATUS + responseEntity.getStatusCode().toString());
             }
-            String responseBody = responseEntity.getBody().toString();
+            Object body = responseEntity.getBody();
+            if (body == null) {
+                throw new NullPointerException("Response body is null");
+            }
+            String responseBody = body.toString();
             convertAndSetResponseObject(response, responseBody, new TypeReference<BiometricRecord>() {
             });
         } catch (Exception e)  {
