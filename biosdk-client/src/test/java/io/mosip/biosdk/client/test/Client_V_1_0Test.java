@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.mosip.biosdk.client.dto.RequestDto;
+import io.mosip.biosdk.client.utils.Util;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +50,7 @@ class Client_V_1_0Test {
 	@BeforeAll
 	public static void startWebServerConnection() throws IOException {
 		mockWebServer = new MockWebServer();
-		mockWebServer.start(InetAddress.getLoopbackAddress(), 9099);
+		mockWebServer.start(InetAddress.getLoopbackAddress(), 9098); //Orginal 9099
 	}
 
 	@AfterAll
@@ -76,24 +78,24 @@ class Client_V_1_0Test {
 		Client_V_1_0 client = new Client_V_1_0();
 
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		mockWebServer.setDispatcher(new Dispatcher() {
-		    @Override
-		    public MockResponse dispatch(RecordedRequest request) {
-		        if (request.getPath().equals("/biosdk-service/init")) {
-		            try {
+			@Override
+			public MockResponse dispatch(RecordedRequest request) {
+				if (request.getPath().equals("/biosdk-service/init")) {
+					try {
 						return new MockResponse()
-						    .setBody(new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class),
-						            StandardCharsets.UTF_8))
-						    .addHeader("Content-Type", "application/json")
-						    .setResponseCode(200);
+								.setBody(new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class),
+										StandardCharsets.UTF_8))
+								.addHeader("Content-Type", "application/json")
+								.setResponseCode(200);
 					} catch (IOException e) {
-					    logger.error("Processing init response: {}", e);
+						logger.error("Processing init response: {}", e);
 					}
-		        } 
-		        return new MockResponse().setResponseCode(404); // Fallback for unmatched requests
-		    }
+				}
+				return new MockResponse().setResponseCode(404); // Fallback for unmatched requests
+			}
 		});
 
 		SDKInfo result = client.init(initParams);
@@ -114,37 +116,37 @@ class Client_V_1_0Test {
 
 		// Execute the init method
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		// Mock response for /biosdk-service/init
 		mockWebServer.setDispatcher(new Dispatcher() {
-		    @Override
-		    public MockResponse dispatch(RecordedRequest request) {
-		        if (request.getPath().equals("/biosdk-service/init")) {
-		            try {
+			@Override
+			public MockResponse dispatch(RecordedRequest request) {
+				if (request.getPath().equals("/biosdk-service/init")) {
+					try {
 						return new MockResponse()
-						    .setBody(new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class),
-						            StandardCharsets.UTF_8))
-						    .addHeader("Content-Type", "application/json")
-						    .setResponseCode(200);
+								.setBody(new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class),
+										StandardCharsets.UTF_8))
+								.addHeader("Content-Type", "application/json")
+								.setResponseCode(200);
 					} catch (IOException e) {
-					    logger.error("Processing init response: {}", e);
+						logger.error("Processing init response: {}", e);
 					}
-		        } else if (request.getPath().equals("/biosdk-service/check-quality")) {
-		            try {
+				} else if (request.getPath().equals("/biosdk-service/check-quality")) {
+					try {
 						return new MockResponse()
-						    .setBody(new String(TestUtil.readXmlFileAsBytes("check_quality_success_response.json", Client_V_1_0.class),
-						            StandardCharsets.UTF_8))
-						    .addHeader("Content-Type", "application/json")
-						    .setResponseCode(200);
+								.setBody(new String(TestUtil.readXmlFileAsBytes("check_quality_success_response.json", Client_V_1_0.class),
+										StandardCharsets.UTF_8))
+								.addHeader("Content-Type", "application/json")
+								.setResponseCode(200);
 					} catch (IOException e) {
-					    logger.error("Processing match response: {}", e);
+						logger.error("Processing match response: {}", e);
 					}
-		        }
-		        return new MockResponse().setResponseCode(404); // Fallback for unmatched requests
-		    }
+				}
+				return new MockResponse().setResponseCode(404); // Fallback for unmatched requests
+			}
 		});
-		
+
 		client.init(initParams);
 
 		Response<QualityCheck> response = client.checkQuality(sample, modalities, flags);
@@ -193,36 +195,36 @@ class Client_V_1_0Test {
 
 		// Execute the init method
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
-		
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
+
 		mockWebServer.setDispatcher(new Dispatcher() {
-		    @Override
-		    public MockResponse dispatch(RecordedRequest request) {
-		        if (request.getPath().equals("/biosdk-service/init")) {
-		            try {
+			@Override
+			public MockResponse dispatch(RecordedRequest request) {
+				if (request.getPath().equals("/biosdk-service/init")) {
+					try {
 						return new MockResponse()
-						    .setBody(new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class),
-						            StandardCharsets.UTF_8))
-						    .addHeader("Content-Type", "application/json")
-						    .setResponseCode(200);
+								.setBody(new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class),
+										StandardCharsets.UTF_8))
+								.addHeader("Content-Type", "application/json")
+								.setResponseCode(200);
 					} catch (IOException e) {
-					    logger.error("Processing init response: {}", e);
+						logger.error("Processing init response: {}", e);
 					}
-		        } else if (request.getPath().equals("/biosdk-service/match")) {
-		            try {
+				} else if (request.getPath().equals("/biosdk-service/match")) {
+					try {
 						return new MockResponse()
-						    .setBody(new String(TestUtil.readXmlFileAsBytes("match_success_not_match_response.json", Client_V_1_0.class),
-						            StandardCharsets.UTF_8))
-						    .addHeader("Content-Type", "application/json")
-						    .setResponseCode(200);
+								.setBody(new String(TestUtil.readXmlFileAsBytes("match_success_not_match_response.json", Client_V_1_0.class),
+										StandardCharsets.UTF_8))
+								.addHeader("Content-Type", "application/json")
+								.setResponseCode(200);
 					} catch (IOException e) {
-					    logger.error("Processing match response: {}", e);
+						logger.error("Processing match response: {}", e);
 					}
-		        }
-		        return new MockResponse().setResponseCode(404); // Fallback for unmatched requests
-		    }
+				}
+				return new MockResponse().setResponseCode(404); // Fallback for unmatched requests
+			}
 		});
-		
+
 		client.init(initParams);
 		Response<MatchDecision[]> response = client.match(sample, gallery, modalities, flags);
 
@@ -253,9 +255,9 @@ class Client_V_1_0Test {
 		// Verify exception message
 		assertNotNull(exception);
 		assertEquals("500", exception.getErrorCode());
-	
+
 		// Cleanup
-	    System.clearProperty("mosip_biosdk_service");
+		System.clearProperty("mosip_biosdk_service");
 	}
 
 	// Test extractTemplate method - Successful case
@@ -271,34 +273,34 @@ class Client_V_1_0Test {
 
 		// Execute the init method
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		mockWebServer.setDispatcher(new Dispatcher() {
-		    @Override
-		    public MockResponse dispatch(RecordedRequest request) {
-		        if (request.getPath().equals("/biosdk-service/init")) {
-		            try {
+			@Override
+			public MockResponse dispatch(RecordedRequest request) {
+				if (request.getPath().equals("/biosdk-service/init")) {
+					try {
 						return new MockResponse()
-						    .setBody(new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class),
-						            StandardCharsets.UTF_8))
-						    .addHeader("Content-Type", "application/json")
-						    .setResponseCode(200);
+								.setBody(new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class),
+										StandardCharsets.UTF_8))
+								.addHeader("Content-Type", "application/json")
+								.setResponseCode(200);
 					} catch (IOException e) {
-					    logger.error("Processing init response: {}", e);
+						logger.error("Processing init response: {}", e);
 					}
-		        } else if (request.getPath().equals("/biosdk-service/extract-template")) {
-		            try {
+				} else if (request.getPath().equals("/biosdk-service/extract-template")) {
+					try {
 						return new MockResponse()
-						    .setBody(new String(TestUtil.readXmlFileAsBytes("extract_template_success_response.json", Client_V_1_0.class),
-						            StandardCharsets.UTF_8))
-						    .addHeader("Content-Type", "application/json")
-						    .setResponseCode(200);
+								.setBody(new String(TestUtil.readXmlFileAsBytes("extract_template_success_response.json", Client_V_1_0.class),
+										StandardCharsets.UTF_8))
+								.addHeader("Content-Type", "application/json")
+								.setResponseCode(200);
 					} catch (IOException e) {
-					    logger.error("Processing extract template response: {}", e);
+						logger.error("Processing extract template response: {}", e);
 					}
-		        }
-		        return new MockResponse().setResponseCode(404); // Fallback for unmatched requests
-		    }
+				}
+				return new MockResponse().setResponseCode(404); // Fallback for unmatched requests
+			}
 		});
 
 		client.init(initParams);
@@ -346,36 +348,36 @@ class Client_V_1_0Test {
 
 		// Execute the init method
 		Map<String, String> initParams = new HashMap<>();
-		initParams.put("format.url.test", "http://localhost:9099/biosdk-service");
+		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
 
 		mockWebServer.setDispatcher(new Dispatcher() {
-		    @Override
-		    public MockResponse dispatch(RecordedRequest request) {
-		        if (request.getPath().equals("/biosdk-service/init")) {
-		            try {
+			@Override
+			public MockResponse dispatch(RecordedRequest request) {
+				if (request.getPath().equals("/biosdk-service/init")) {
+					try {
 						return new MockResponse()
-						    .setBody(new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class),
-						            StandardCharsets.UTF_8))
-						    .addHeader("Content-Type", "application/json")
-						    .setResponseCode(200);
+								.setBody(new String(TestUtil.readXmlFileAsBytes("init_response_success.json", Client_V_1_0.class),
+										StandardCharsets.UTF_8))
+								.addHeader("Content-Type", "application/json")
+								.setResponseCode(200);
 					} catch (IOException e) {
-					    logger.error("Processing init response: {}", e);
+						logger.error("Processing init response: {}", e);
 					}
-		        } else if (request.getPath().equals("/biosdk-service/convert-format")) {
-		            try {
+				} else if (request.getPath().equals("/biosdk-service/convert-format")) {
+					try {
 						return new MockResponse()
-						    .setBody(new String(TestUtil.readXmlFileAsBytes("convert_format_success_response.json", Client_V_1_0.class),
-						            StandardCharsets.UTF_8))
-						    .addHeader("Content-Type", "application/json")
-						    .setResponseCode(200);
+								.setBody(new String(TestUtil.readXmlFileAsBytes("convert_format_success_response.json", Client_V_1_0.class),
+										StandardCharsets.UTF_8))
+								.addHeader("Content-Type", "application/json")
+								.setResponseCode(200);
 					} catch (IOException e) {
-					    logger.error("Processing convert format response: {}", e);
+						logger.error("Processing convert format response: {}", e);
 					}
-		        }
-		        return new MockResponse().setResponseCode(404); // Fallback for unmatched requests
-		    }
+				}
+				return new MockResponse().setResponseCode(404); // Fallback for unmatched requests
+			}
 		});
-		
+
 		client.init(initParams);
 
 		Response<BiometricRecord> response = client.convertFormatV2(sample, sourceFormat, targetFormat, sourceParams,
@@ -453,7 +455,7 @@ class Client_V_1_0Test {
 
 	@Test
 	void testGetSdkUrls_NoValidUrlsThrowsException() throws Exception {
-	    Client_V_1_0 client = new Client_V_1_0();
+		Client_V_1_0 client = new Client_V_1_0();
 
 		// Prepare input without any valid URLs
 		Map<String, String> initParams = new HashMap<>();
@@ -469,114 +471,126 @@ class Client_V_1_0Test {
 		assertTrue(exception.getCause() instanceof Exception);
 		assertEquals("No valid sdk service url configured", exception.getCause().getMessage());
 	}
-	
+
 	@Test
-    void testGetAggregatedSdkInfo_SingleElement() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
-        Client_V_1_0 client = new Client_V_1_0();
+	void testGetAggregatedSdkInfo_SingleElement() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+		Client_V_1_0 client = new Client_V_1_0();
 
-        List<SDKInfo> sdkInfos = new ArrayList<>();
-        SDKInfo sdkInfo = new SDKInfo("1.0", "1.0", "OrganizationA", "TypeA");
-        sdkInfos.add(sdkInfo);
+		List<SDKInfo> sdkInfos = new ArrayList<>();
+		SDKInfo sdkInfo = new SDKInfo("1.0", "1.0", "OrganizationA", "TypeA");
+		sdkInfos.add(sdkInfo);
 
-        // Use reflection to access the private method
-        Method method = Client_V_1_0.class.getDeclaredMethod("getAggregatedSdkInfo", List.class);
-        method.setAccessible(true);
+		// Use reflection to access the private method
+		Method method = Client_V_1_0.class.getDeclaredMethod("getAggregatedSdkInfo", List.class);
+		method.setAccessible(true);
 
-        SDKInfo result = (SDKInfo) method.invoke(client, sdkInfos);
+		SDKInfo result = (SDKInfo) method.invoke(client, sdkInfos);
 
-        // Since there is only one element, it should return that element
-        assertNotNull(result);
-        assertEquals("1.0", result.getApiVersion());
-        assertEquals("1.0", result.getSdkVersion());
-        assertEquals("OrganizationA", result.getProductOwner().getOrganization());
-        assertEquals("TypeA", result.getProductOwner().getType());
-    }
+		// Since there is only one element, it should return that element
+		assertNotNull(result);
+		assertEquals("1.0", result.getApiVersion());
+		assertEquals("1.0", result.getSdkVersion());
+		assertEquals("OrganizationA", result.getProductOwner().getOrganization());
+		assertEquals("TypeA", result.getProductOwner().getType());
+	}
 
-    @Test
-    void testGetAggregatedSdkInfo_MultipleElements() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
-        Client_V_1_0 client = new Client_V_1_0();
+	@Test
+	void testGetAggregatedSdkInfo_MultipleElements() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+		Client_V_1_0 client = new Client_V_1_0();
 
-        List<SDKInfo> sdkInfos = new ArrayList<>();
-        SDKInfo sdkInfo1 = new SDKInfo("1.0", "1.0", "OrganizationA", "TypeA");
-        SDKInfo sdkInfo2 = new SDKInfo("1.1", "1.1", "OrganizationB", "TypeB");
-        sdkInfos.add(sdkInfo1);
-        sdkInfos.add(sdkInfo2);
+		List<SDKInfo> sdkInfos = new ArrayList<>();
+		SDKInfo sdkInfo1 = new SDKInfo("1.0", "1.0", "OrganizationA", "TypeA");
+		SDKInfo sdkInfo2 = new SDKInfo("1.1", "1.1", "OrganizationB", "TypeB");
+		sdkInfos.add(sdkInfo1);
+		sdkInfos.add(sdkInfo2);
 
-        // Use reflection to access the private method
-        Method method = Client_V_1_0.class.getDeclaredMethod("getAggregatedSdkInfo", List.class);
-        method.setAccessible(true);
+		// Use reflection to access the private method
+		Method method = Client_V_1_0.class.getDeclaredMethod("getAggregatedSdkInfo", List.class);
+		method.setAccessible(true);
 
-        SDKInfo result = (SDKInfo) method.invoke(client, sdkInfos);
-        
-        // Since there are multiple elements, it should return the first one
-        assertNotNull(result);
-        assertEquals("1.0", result.getApiVersion()); // Should return the first element
-        assertEquals("1.0", result.getSdkVersion());
-        assertEquals("OrganizationA", result.getProductOwner().getOrganization());
-        assertEquals("TypeA", result.getProductOwner().getType());
-    }
+		SDKInfo result = (SDKInfo) method.invoke(client, sdkInfos);
 
-    @Test
-    void testGetAggregatedSdkInfo_EmptyList() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
-        Client_V_1_0 client = new Client_V_1_0();
+		// Since there are multiple elements, it should return the first one
+		assertNotNull(result);
+		assertEquals("1.0", result.getApiVersion()); // Should return the first element
+		assertEquals("1.0", result.getSdkVersion());
+		assertEquals("OrganizationA", result.getProductOwner().getOrganization());
+		assertEquals("TypeA", result.getProductOwner().getType());
+	}
 
-        List<SDKInfo> sdkInfos = new ArrayList<>();
+	@Test
+	void testGetAggregatedSdkInfo_EmptyList() throws NoSuchMethodException, SecurityException, IllegalAccessException, InvocationTargetException {
+		Client_V_1_0 client = new Client_V_1_0();
 
-        // Use reflection to access the private method
-        Method method = Client_V_1_0.class.getDeclaredMethod("getAggregatedSdkInfo", List.class);
-        method.setAccessible(true);
+		List<SDKInfo> sdkInfos = new ArrayList<>();
 
-        SDKInfo result = (SDKInfo) method.invoke(client, sdkInfos);
-        // Since the list is empty, it should return null
-        assertNull(result);
-    }
-    
-    @Test
-    void testGetDefaultSdkServiceUrlFromEnv_WithSystemProperty() throws Exception {
-        Client_V_1_0 client = new Client_V_1_0();
+		// Use reflection to access the private method
+		Method method = Client_V_1_0.class.getDeclaredMethod("getAggregatedSdkInfo", List.class);
+		method.setAccessible(true);
 
-        // Set system property for MOSIP_BIOSDK_SERVICE
-        setSystemProperty("mosip_biosdk_service", "http://localhost:9099");
+		SDKInfo result = (SDKInfo) method.invoke(client, sdkInfos);
+		// Since the list is empty, it should return null
+		assertNull(result);
+	}
 
-        // Use reflection to access the private method
-        Method method = Client_V_1_0.class.getDeclaredMethod("getDefaultSdkServiceUrlFromEnv");
-        method.setAccessible(true);
+	@Test
+	void testGetDefaultSdkServiceUrlFromEnv_WithSystemProperty() throws Exception {
+		Client_V_1_0 client = new Client_V_1_0();
 
-        // Invoke the private method
-        String result = (String) method.invoke(client);
+		// Set system property for MOSIP_BIOSDK_SERVICE
+		setSystemProperty("mosip_biosdk_service", "http://localhost:9098");
 
-        // Assert that the system property value is returned
-        assertEquals("http://localhost:9099", result);
+		// Use reflection to access the private method
+		Method method = Client_V_1_0.class.getDeclaredMethod("getDefaultSdkServiceUrlFromEnv");
+		method.setAccessible(true);
 
-        // Clear the system property after the test
-        clearSystemProperty("mosip_biosdk_service");
-    }
+		// Invoke the private method
+		String result = (String) method.invoke(client);
 
-    @Test
-    void testGetDefaultSdkServiceUrlFromEnv_NoValue() throws Exception {
-        Client_V_1_0 client = new Client_V_1_0();
+		// Assert that the system property value is returned
+		assertEquals("http://localhost:9098", result);
 
-        // Clear system property and environment variable
-        clearSystemProperty("mosip_biosdk_service");
+		// Clear the system property after the test
+		clearSystemProperty("mosip_biosdk_service");
+	}
 
-        // Use reflection to access the private method
-        Method method = Client_V_1_0.class.getDeclaredMethod("getDefaultSdkServiceUrlFromEnv");
-        method.setAccessible(true);
+	@Test
+	void testGetDefaultSdkServiceUrlFromEnv_NoValue() throws Exception {
+		Client_V_1_0 client = new Client_V_1_0();
 
-        // Invoke the private method
-        String result = (String) method.invoke(client);
+		// Clear system property and environment variable
+		clearSystemProperty("mosip_biosdk_service");
 
-        // Assert that null is returned if neither the system property nor the environment variable is set
-        assertNull(result);
-    }
-        
-    // Helper method to set a system property for testing
-    private void setSystemProperty(String key, String value) {
-        System.setProperty(key, value);
-    }
+		// Use reflection to access the private method
+		Method method = Client_V_1_0.class.getDeclaredMethod("getDefaultSdkServiceUrlFromEnv");
+		method.setAccessible(true);
 
-    // Helper method to clear system property after the test
-    private void clearSystemProperty(String key) {
-        System.clearProperty(key);
-    }
+		// Invoke the private method
+		String result = (String) method.invoke(client);
+
+		// Assert that null is returned if neither the system property nor the environment variable is set
+		assertNull(result);
+	}
+
+	// Helper method to set a system property for testing
+	private void setSystemProperty(String key, String value) {
+		System.setProperty(key, value);
+	}
+
+	// Helper method to clear system property after the test
+	private void clearSystemProperty(String key) {
+		System.clearProperty(key);
+	}
+
+	private RequestDto generateNewRequestDto(Object body) {
+		RequestDto requestDto = new RequestDto();
+		try {
+			String jsonBody = Util.getObjectMapper().writeValueAsString(body);
+			requestDto.setVersion("1.0");
+			requestDto.setRequest(Util.base64Encode(jsonBody));
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to serialize request body", e);
+		}
+		return requestDto;
+	}
 }
