@@ -128,7 +128,7 @@ class UtilTest {
 		InitRequestDto initRequestDto = new InitRequestDto();
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("format.url.test", "http://localhost:9098/biosdk-service");
-		
+
 		initRequestDto.setInitParams(initParams); // Set initialization params
 		RequestDto requestDto = generateNewRequestDto(initRequestDto);
 
@@ -321,7 +321,7 @@ class UtilTest {
 				return new MockResponse().setResponseCode(404); // Fallback for unmatched requests
 			}
 		});
-				
+
 		// Call the method under test and assert exception is thrown
 		Exception exception = assertThrows(RestClientException.class, () -> {
 			Util.restRequest(url + "/init", method, mediaType, requestDto, null, Object.class);
