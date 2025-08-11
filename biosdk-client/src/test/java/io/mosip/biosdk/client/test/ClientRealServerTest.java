@@ -21,10 +21,10 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class ClientRealServerTest {
+class ClientRealServerTestFull {
 
 	private static final String REAL_SERVER_URL = "http://localhost:9099/biosdk-service";
-	private static Logger logger = LoggerConfig.logConfig(ClientRealServerTest.class);
+	private static Logger logger = LoggerConfig.logConfig(ClientRealServerTestFull.class);
 
 	private Client_V_1_0 client;
 	private BiometricRecord sampleRecord;
@@ -74,29 +74,6 @@ class ClientRealServerTest {
 
 		sampleRecord = new BiometricRecord();
 		sampleRecord.setSegments(Collections.singletonList(bir));
-	}
-
-	//@Test
-	@Order(0)
-	@DisplayName("Test init() loads URLs, sets config params, and returns SDKInfo")
-	void testInit() throws Exception {
-		Map<String, String> initParams = new HashMap<>();
-		// Ensure default URL is present (code falls back to default when format not specified)
-		initParams.put("format.url.default", REAL_SERVER_URL);
-		// Optional extra named format to prove multi-URL map works
-		initParams.put("format.url.test", REAL_SERVER_URL);
-		// Verify config.parameter.* becomes a system property
-		initParams.put("config.parameter.sampleKey", "sampleValue");
-
-		io.mosip.kernel.biometrics.model.SDKInfo info = client.init(initParams);
-
-		assertNotNull(info, "SDKInfo should not be null");
-		// These fields should typically be present; loosen if your server omits any
-		assertNotNull(info.getApiVersion(), "API version should be set");
-		assertNotNull(info.getSdkVersion(), "SDK version should be set");
-
-		// Confirm config.parameter.* was applied as a System property
-		assertEquals("sampleValue", System.getProperty("sampleKey"), "Config parameter should be set as system property");
 	}
 
 	//@Test
