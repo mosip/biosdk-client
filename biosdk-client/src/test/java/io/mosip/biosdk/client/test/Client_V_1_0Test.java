@@ -696,6 +696,47 @@ class Client_V_1_0Test {
     }
 
     /**
+     * Test convertAndSetResponseObject method with null response body
+     */
+    @Test
+    void convertAndSetResponseObject_NullResponseBody() throws Exception {
+        Client_V_1_0 client = new Client_V_1_0();
+        Response<BiometricRecord> response = new Response<>();
+
+        ResponseEntity<String> responseEntity = new ResponseEntity<>(null, org.springframework.http.HttpStatus.OK);
+
+        Method convertAndSetResponseObjectMethod = Client_V_1_0.class.getDeclaredMethod(
+                "convertAndSetResponseObject", Response.class, ResponseEntity.class);
+        convertAndSetResponseObjectMethod.setAccessible(true);
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            convertAndSetResponseObjectMethod.invoke(client, response, responseEntity);
+        });
+
+        assertTrue(exception.getCause() instanceof NullPointerException);
+        assertEquals("Response body is null", exception.getCause().getMessage());
+    }
+
+    /**
+     * Test convertAndSetResponseObject method (String version) with null body
+     */
+    @Test
+    void convertAndSetResponseObject_StringVersion_NullBody() throws Exception {
+        Client_V_1_0 client = new Client_V_1_0();
+        Response<BiometricRecord> response = new Response<>();
+
+        Method convertAndSetResponseObjectMethod = Client_V_1_0.class.getDeclaredMethod(
+                "convertAndSetResponseObject", Response.class, String.class, TypeReference.class);
+        convertAndSetResponseObjectMethod.setAccessible(true);
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            convertAndSetResponseObjectMethod.invoke(client, response, null, new TypeReference<BiometricRecord>() {});
+        });
+
+        assertNotNull(exception.getCause());
+    }
+
+    /**
      * Test getAggregatedSdkInfo method with null productOwner
      */
     @Test
