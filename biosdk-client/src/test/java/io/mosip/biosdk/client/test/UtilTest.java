@@ -67,14 +67,18 @@ class UtilTest {
 		System.setProperty("mosip_biosdk_service", "http://localhost:9098/biosdk-service");
 	}
 
-	@AfterAll
-	public static void closeWebServerConnection() throws IOException {
-		if (mockWebServer != null) {
-			mockWebServer.close();
-			mockWebServer.shutdown();
-			mockWebServer = null;
-		}
-	}
+    @AfterAll
+    public static void closeWebServerConnection() {
+        if (mockWebServer != null) {
+            try {
+                mockWebServer.shutdown(); // or mockWebServer.close(), but not both
+            } catch (IOException e) {
+                System.err.println("MockWebServer shutdown failed: " + e.getMessage());
+            } finally {
+                mockWebServer = null;
+            }
+        }
+    }
 
 	@BeforeEach
 	public void setup() {
