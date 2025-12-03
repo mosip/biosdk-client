@@ -82,7 +82,7 @@ Homepage: https://www.slf4j.org/
 ================================================================================
 Package: OkHttp MockWebServer (com.squareup.okhttp3:mockwebserver)
 Version: (Not specified in SBOM)
-License: Apache License 2.0 (Inferred from project’s official repository)
+License: MIT License
 Homepage: https://square.github.io/okhttp/
 ================================================================================
 
@@ -141,6 +141,13 @@ Package: Central Publishing Maven Plugin (org.sonatype.central:central-publishin
 Version: 0.7.0
 License: Apache License 2.0
 Homepage: https://central.sonatype.org/publish/publish-portal-maven/
+================================================================================
+
+================================================================================
+Package: Maven Deploy Plugin (org.apache.maven.plugins:maven-deploy-plugin)
+Version: 3.1.1
+License: Apache License 2.0
+Homepage: https://maven.apache.org/plugins/maven-deploy-plugin/
 ================================================================================
 
 Full license texts and additional details for each of the above packages are available in the license/ directory of this repository. Please refer to those files or the original source of each package for complete legal terms and conditions.
