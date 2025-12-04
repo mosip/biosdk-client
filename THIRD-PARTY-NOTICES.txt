@@ -75,7 +75,7 @@ Homepage: https://commons.apache.org/codec/
 ================================================================================
 Package: SLF4J Bridges (org.slf4j:jcl-over-slf4j, org.slf4j:jul-to-slf4j)
 Version: (Not specified in SBOM)
-License: Apache License 2.0 (Inferred from project’s official repository)
+License: MIT License
 Homepage: https://www.slf4j.org/
 ================================================================================
 
