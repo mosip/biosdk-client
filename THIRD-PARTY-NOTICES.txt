@@ -130,13 +130,6 @@ Homepage: https://maven.apache.org/plugins/
 ================================================================================
 
 ================================================================================
-Package: Git Commit Id Maven Plugin (pl.project13.maven:git-commit-id-plugin)
-Version: 3.0.1
-License: GNU Lesser General Public License 3.0 (Inferred from project’s official repository)
-Homepage: https://github.com/git-commit-id/git-commit-id-maven-plugin
-================================================================================
-
-================================================================================
 Package: Central Publishing Maven Plugin (org.sonatype.central:central-publishing-maven-plugin)
 Version: 0.7.0
 License: Apache License 2.0
