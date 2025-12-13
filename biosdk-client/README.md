@@ -124,7 +124,7 @@ There are multiple ways to deploy biosdk-client with mosip-services. According t
 1. Create a text script file named "install.sh", as shown below:
 
 ```text
-	#!/bin/text
+        #!/bin/text
 
 	#installs the Bio-SDK
 	set -e
@@ -159,24 +159,6 @@ zip biosdk.zip biosdk-client-x.x.x-jar-with-dependencies.jar install.sh
 For more information on deployment, please refer to [mosip-infra](https://github.com/mosip/mosip-infra) README file.
 
 **Note:** Set the `mosip_biosdk_service` environment variable when running Docker containers that use the biosdk-client.
-
----
-
-## Upgrade
-
-### Upgrade Steps
-
-1. Backup your current configuration from config server
-2. Stop the dependent services (ID Authentication, ID Repository)
-3. Update the biosdk-client version in your project's POM file
-4. Rebuild and redeploy dependent services with the updated JAR:
-   ```text
-   mvn clean install -Dgpg.skip=true
-   ```
-5. Verify logs and health endpoints
-6. Run validation tests to ensure biometric operations are working correctly
-
-For major version upgrades, refer to the [MOSIP Release Notes](https://docs.mosip.io/1.2.0/releases) for breaking changes.
 
 ---
 
