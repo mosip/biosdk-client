@@ -49,10 +49,10 @@ This library is used by the following MOSIP services:
 
 Ensure you have the following dependencies installed before proceeding:
 
-	1. **Java**: Version 21.0.3
-	2. **Maven**: Version 3.9.6 for building the project.
-	3. **Git**: To clone the repository
-	4. **Postman (optional)**: For testing the APIs
+- **JDK**: 21
+- **Maven**: 3.9.6
+- **Docker**: Latest stable version
+- **PostgreSQL**: 10.2 or higher
 
 ---
 
@@ -111,7 +111,7 @@ mosip_biosdk_service=<Bio SDK service url>
 for example:
 
 ```properties
-mosip_biosdk_service=http://localhost:9099/biosdk-service/
+mosip_biosdk_service=http://localhost:<port>/biosdk-service/
 ```
 ---
 
