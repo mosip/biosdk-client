@@ -62,14 +62,14 @@ Ensure you have the following dependencies installed before proceeding:
 
 1. **Clone the repository**
 
-```bash
+```text
    git clone https://github.com/mosip/biosdk-client.git
    cd biosdk-client
 ```
 
 2. **Build the project using Maven to resolve dependencies**
 
-```bash
+```text
    mvn clean install -Dgpg.skip=true
 ```
 ---
@@ -83,7 +83,7 @@ Bio-SDK service URLs can vary based on the modality and format. Specify these in
 For example, to configure the URL for the minutiae format of fingerprints:
 
 ```text
-	finger.format.url.minutiae -> "<Bio-SDK Service URL for minutiae format>"
+finger.format.url.minutiae -> "<Bio-SDK Service URL for minutiae format>"
 ```
 
 ## Default Format Configuration
@@ -91,9 +91,9 @@ For example, to configure the URL for the minutiae format of fingerprints:
 For a generic format configuration, use the `.default` suffix:
 
 ```text
-	finger.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format of finger biometrics>"
-	iris.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format of iris biometrics>"
-	face.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format of face biometrics>"
+finger.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format of finger biometrics>"
+iris.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format of iris biometrics>"
+face.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format of face biometrics>"
 ```
 
 If the above URLs are not specified in initParams, it will take a default Bio-SDK service URL from below property.
@@ -105,13 +105,13 @@ If the above URLs are not specified in initParams, it will take a default Bio-SD
 If the above URLs are not specified in initParams, the system will fallback to a global default URL:
 
 ```properties
-	mosip_biosdk_service=<Bio SDK service url>
+mosip_biosdk_service=<Bio SDK service url>
 ```
 
 for example:
 
 ```properties
-	mosip_biosdk_service=http://localhost:9099/biosdk-service/
+mosip_biosdk_service=http://localhost:9099/biosdk-service/
 ```
 ---
 
@@ -121,10 +121,10 @@ There are multiple ways to deploy biosdk-client with mosip-services. According t
 
 ### Create install script
 
-1. Create a bash script file named "install.sh", as shown below:
+1. Create a text script file named "install.sh", as shown below:
 
-```sh
-	#!/bin/bash
+```text
+	#!/bin/text
 
 	#installs the Bio-SDK
 	set -e
@@ -149,7 +149,7 @@ There are multiple ways to deploy biosdk-client with mosip-services. According t
 
 2.  Create a ZIP file:
 
-```bash
+```text
 zip biosdk.zip biosdk-client-x.x.x-jar-with-dependencies.jar install.sh
 ```
 
@@ -170,7 +170,7 @@ For more information on deployment, please refer to [mosip-infra](https://github
 2. Stop the dependent services (ID Authentication, ID Repository)
 3. Update the biosdk-client version in your project's POM file
 4. Rebuild and redeploy dependent services with the updated JAR:
-   ```bash
+   ```text
    mvn clean install -Dgpg.skip=true
    ```
 5. Verify logs and health endpoints
