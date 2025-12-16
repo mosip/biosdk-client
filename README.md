@@ -8,5 +8,11 @@ To know more about Biometric SDK Specification, refer [here](https://docs.mosip.
 
 To know more about implementation, refer [here](biosdk-client/README.md).
 
+## Contribution & Community
+
+• To learn how you can contribute code to this application, [click here](https://docs.mosip.io/1.2.0/community/code-contributions).
+
+• If you have questions or encounter issues, visit the [MOSIP Community](https://community.mosip.io/) for support.
+
 ### License
 This project is licensed under the terms of [Mozilla Public License 2.0](LICENSE).
