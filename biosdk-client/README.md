@@ -164,17 +164,6 @@ For more information on deployment, please refer to [mosip-infra](https://github
 
 ## Documentation
 
-For more detailed documentation, check the [docs](docs) directory (if available).
-
-### API Documentation
-
-API interfaces and usage details:
-
-- **IBioApiV2 Interface**: [GitHub Source](https://github.com/mosip/bio-utils/blob/master/kernel-biometrics-api/src/main/java/io/mosip/kernel/biometrics/spi/IBioApiV2.java)
-- **GitHub Pages**: [MOSIP API Documentation](https://mosip.github.io/documentation/)
-
-### Product Documentation
-
 To learn more about Bio-SDK Client from a functional perspective and use case scenarios, refer to our main documentation: [Biometric SDK](https://docs.mosip.io/1.2.0/biometrics/biometric-sdk).
 
 ---
