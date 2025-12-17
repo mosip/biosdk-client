@@ -69,11 +69,15 @@ class UtilTest {
 
 	@AfterAll
 	public static void closeWebServerConnection() throws IOException {
-		if (mockWebServer != null) {
-			mockWebServer.close();
-			mockWebServer.shutdown();
-			mockWebServer = null;
-		}
+        if (mockWebServer != null) {
+            try {
+                mockWebServer.shutdown();
+            } catch (IOException e) {
+                logger.error("Error during MockWebServer shutdown: {}", e);
+            } finally {
+                mockWebServer = null;
+            }
+        }
 	}
 
 	@BeforeEach
@@ -81,6 +85,18 @@ class UtilTest {
 		MockitoAnnotations.openMocks(this); // Initialize mocks
 		gson = new GsonBuilder().serializeNulls().create();
 	}
+
+    @AfterEach
+    public void tearDown() {
+        if (mockWebServer != null) {
+            mockWebServer.setDispatcher(new Dispatcher() {
+                @Override
+                public MockResponse dispatch(RecordedRequest request) {
+                    return new MockResponse().setResponseCode(404);
+                }
+            });
+        }
+    }
 
 	@Test
 	void testRestRequestSuccessWithBodyAndHeaders() throws IOException {

@@ -2,9 +2,13 @@
 
 ## Overview
 
-The BioSDK-Client library provides an implementation of [IBioAPIV2](https://github.com/mosip/bio-utils/blob/master/kernel-biometrics-api/src/main/java/io/mosip/kernel/biometrics/spi/IBioApiV2.java), enabling seamless integration with Bio-SDK services for biometric-related functionalities. It supports operations like 1:N matching, segmentation, and extraction, making it a critical component for ID authentication and ID repository services.
+The **BioSDK-Client** library provides an implementation of [IBioApiV2](https://github.com/mosip/bio-utils/blob/master/kernel-biometrics-api/src/main/java/io/mosip/kernel/biometrics/spi/IBioApiV2.java), enabling seamless integration with Bio-SDK services for biometric-related functionalities. It supports operations like 1:N matching, segmentation, and extraction, making it a critical component for ID authentication and ID repository services.
 
-It is used by:
+For a complete functional overview and capabilities, refer to the **[official documentation](https://docs.mosip.io/1.2.0/biometrics/biometric-sdk)**.
+
+### Used By
+
+This library is used by the following MOSIP services:
 
 * [authentication-internal-service](https://github.com/mosip/id-authentication/tree/master/authentication/authentication-internal-service)
 * [authentication-service](https://github.com/mosip/id-authentication/tree/master/authentication/authentication-service)
@@ -12,14 +16,32 @@ It is used by:
 
 ---
 
+## Features
+
+- Implementation of IBioApiV2 interface
+- 1:N biometric matching
+- Biometric segmentation and extraction
+- Quality assessment and validation
+- Multi-modal biometric support (fingerprint, iris, face)
+- Format-specific and default URL configuration
+- Integration with external Bio-SDK services
+- Retry and fault-tolerance mechanisms
+- Caching for improved performance
+
+---
+
 ## Table of Contents
 
-	* [Overview](#overview)
-	* [Prerequisites](#prerequisites)
-	* [Setting Up Locally](#setting-up-locally)
-	* [Configurations](#configurations)
-	* [Deployment](#deployment)
-	* [License](#license)
+* [Overview](#overview)
+* [Features](#features)
+* [Prerequisites](#prerequisites)
+* [Setting Up Locally](#setting-up-locally)
+* [Configurations](#configurations)
+* [Deployment](#deployment)
+* [Upgrade](#upgrade)
+* [Documentation](#documentation)
+* [Contribution & Community](#contribution--community)
+* [License](#license)
 
 ---
 
@@ -27,10 +49,10 @@ It is used by:
 
 Ensure you have the following dependencies installed before proceeding:
 
-	1. **Java**: Version 21.0.3
-	2. **Maven**: Version 3.9.6 for building the project.
-	3. **Git**: To clone the repository
-	4. **Postman (optional)**: For testing the APIs
+- **JDK**: 21
+- **Maven**: 3.9.6
+- **Docker**: Latest stable version
+- **PostgreSQL**: 10.2 or higher
 
 ---
 
@@ -40,14 +62,14 @@ Ensure you have the following dependencies installed before proceeding:
 
 1. **Clone the repository**
 
-```bash
+```text
    git clone https://github.com/mosip/biosdk-client.git
    cd biosdk-client
 ```
 
 2. **Build the project using Maven to resolve dependencies**
 
-```bash
+```text
    mvn clean install -Dgpg.skip=true
 ```
 ---
@@ -61,7 +83,7 @@ Bio-SDK service URLs can vary based on the modality and format. Specify these in
 For example, to configure the URL for the minutiae format of fingerprints:
 
 ```text
-	finger.format.url.minutiea -> "<Bio-SDK Service URL for minutiea format>"
+finger.format.url.minutiae -> "<Bio-SDK Service URL for minutiae format>"
 ```
 
 ## Default Format Configuration
@@ -69,9 +91,9 @@ For example, to configure the URL for the minutiae format of fingerprints:
 For a generic format configuration, use the `.default` suffix:
 
 ```text
-	finger.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format of finger biomertrics>"
-	iris.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format of iris biometrics>"
-	face.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format or face biometrics>"
+finger.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format of finger biometrics>"
+iris.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format of iris biometrics>"
+face.format.url.default -> "<Default Bio-SDK Service URL for any unspecified format of face biometrics>"
 ```
 
 If the above URLs are not specified in initParams, it will take a default Bio-SDK service URL from below property.
@@ -83,13 +105,13 @@ If the above URLs are not specified in initParams, it will take a default Bio-SD
 If the above URLs are not specified in initParams, the system will fallback to a global default URL:
 
 ```properties
-	mosip_biosdk_service=<Bio SDK service url>
+mosip_biosdk_service=<Bio SDK service url>
 ```
 
 for example:
 
 ```properties
-	mosip_biosdk_service=http://localhost:9099/biosdk-service/
+mosip_biosdk_service=http://localhost:<port>/biosdk-service/
 ```
 ---
 
@@ -99,10 +121,10 @@ There are multiple ways to deploy biosdk-client with mosip-services. According t
 
 ### Create install script
 
-1. Create a bash script file named "install.sh", as shown below:
+1. Create a text script file named "install.sh", as shown below:
 
-```sh
-	#!/bin/bash
+```text
+        #!/bin/text
 
 	#installs the Bio-SDK
 	set -e
@@ -127,7 +149,7 @@ There are multiple ways to deploy biosdk-client with mosip-services. According t
 
 2.  Create a ZIP file:
 
-```bash
+```text
 zip biosdk.zip biosdk-client-x.x.x-jar-with-dependencies.jar install.sh
 ```
 
@@ -136,12 +158,28 @@ zip biosdk.zip biosdk-client-x.x.x-jar-with-dependencies.jar install.sh
 
 For more information on deployment, please refer to [mosip-infra](https://github.com/mosip/mosip-infra) README file.
 
-**Note:** Set the mosip_biosdk_service environment variable when running Docker containers that use the biosdk-client.
+**Note:** Set the `mosip_biosdk_service` environment variable when running Docker containers that use the biosdk-client.
+
+---
+
+## Documentation
+
+To learn more about Bio-SDK Client from a functional perspective and use case scenarios, refer to our main documentation: [Biometric SDK](https://docs.mosip.io/1.2.0/biometrics/biometric-sdk).
+
+---
+
+## Contribution & Community
+
+• To learn how you can contribute code to this application, [click here](https://docs.mosip.io/1.2.0/community/code-contributions).
+
+• If you have questions or encounter issues, visit the [MOSIP Community](https://community.mosip.io/) for support.
+
+• For any GitHub issues: [Report here](https://github.com/mosip/biosdk-client/issues)
 
 ---
 
 ## License
 
-This project is licensed under the [MOSIP License](LICENSE).  
+This project is licensed under the [Mozilla Public License 2.0](LICENSE).  
 
 ---
