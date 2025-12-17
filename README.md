@@ -1,4 +1,4 @@
-[![Maven Package upon a push](https://github.com/mosip/biosdk-client/actions/workflows/push-trigger.yml/badge.svg?branch=deveop)](https://github.com/mosip/biosdk-client/actions/workflows/push-trigger.yml)
+[![Maven Package upon a push](https://github.com/mosip/biosdk-client/actions/workflows/push-trigger.yml/badge.svg?branch=develop)](https://github.com/mosip/biosdk-client/actions/workflows/push-trigger.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=develop&project=mosip_biosdk-client&metric=alert_status)](https://sonarcloud.io/dashboard?branch=develop&id=mosip_biosdk-client)
 # Bio-SDK Client
 ## Overview
