@@ -1,0 +1,38 @@
+================================================================================
+COPYRIGHT NOTICES
+================================================================================
+
+This software includes components from multiple open-source projects. The 
+following copyright notices apply to the respective packages:
+
+APACHE LICENSE 2.0 COMPONENTS:
+• Spring Framework - Copyright © 2002-2022 VMware, Inc.
+• Jackson JSON Processor - Copyright 2007-, Tatu Saloranta
+• Apache Commons Libraries - Copyright 2001-2024 The Apache Software Foundation
+• Gson - Copyright 2008 Google Inc.
+• Apache HttpClient - Copyright 1999-2024 The Apache Software Foundation
+• OkHttp MockWebServer - Copyright 2019 Square, Inc.
+• JSON.simple - Copyright 2006-2009 Yidong Fang
+• Apache Maven Plugins - Copyright 2001-2024 The Apache Software Foundation
+• Central Publishing Maven Plugin - Copyright (c) 2022-present Sonatype, Inc.
+
+MIT LICENSE COMPONENTS:
+• Project Lombok - Copyright (C) 2009-2021 The Project Lombok Authors
+• SLF4J - Copyright (c) 2004-2025 QOS.ch
+• Mockito Core - Copyright (c) 2007 Mockito Contributors
+
+ECLIPSE PUBLIC LICENSE 2.0 COMPONENTS:
+• JUnit Jupiter (API & Engine) - Copyright © Eclipse Foundation, Inc.
+• JaCoCo Maven Plugin - Copyright (c) 2009, 2023 Mountainminds GmbH & Co. KG 
+  and Contributors
+
+LGPL 3.0 COMPONENTS:
+• Git Commit ID Maven Plugin - Copyright (c) 2012-2021 Konrad Malawski
+• Sonar Maven Plugin - Copyright 2011-2024 SonarSource SA
+
+MOZILLA PUBLIC LICENSE 2.0 COMPONENTS:
+• MOSIP Kernel Libraries - Copyright © 2018-present IIIT-Bangalore
+
+All rights reserved by the respective copyright holders. See the full license 
+texts in the license/ directory for complete terms and conditions.
+================================================================================
