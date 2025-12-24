@@ -1,0 +1,14 @@
+THIRD-PARTY-NOTICES
+
+This project uses third-party components under licenses that require attribution.
+
+- MOSIP Kernel Libraries – Mozilla Public License 2.0
+- Project Lombok – MIT License
+- Mockito Core – MIT License
+- JUnit Jupiter API – Eclipse Public License 2.0
+- JUnit Jupiter Engine – Eclipse Public License 2.0
+- JUnit Vintage Engine – Eclipse Public License 2.0
+- Git Commit Id Maven Plugin – GNU Lesser General Public License 3.0
+
+MOSIP COPYRIGHT NOTICE
+© 2018–2025 MOSIP (Modular Open Source Identity Platform)
