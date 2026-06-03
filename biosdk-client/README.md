@@ -1,4 +1,6 @@
 # BioSDK-Client
+[![Maven Package upon a push](https://github.com/mosip/biosdk-client/actions/workflows/push-trigger.yml/badge.svg?branch=release-1.3.x)](https://github.com/mosip/biosdk-client/actions/workflows/push-trigger.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?branch=release-1.3.x&project=mosip_biosdk-client&id=mosip_biosdk-client&metric=alert_status)](https://sonarcloud.io/dashboard?branch=release-1.3.x&id=mosip_biosdk-client)
 
 ## Overview
 
@@ -144,8 +146,8 @@ There are multiple ways to deploy biosdk-client with mosip-services. According t
 
 1. Place the following files in the same folder:
 
-  * biosdk-client-x.x.x-jar-with-dependencies.jar
-  * install.sh
+* biosdk-client-x.x.x-jar-with-dependencies.jar
+* install.sh
 
 2.  Create a ZIP file:
 
@@ -180,6 +182,6 @@ To learn more about Bio-SDK Client from a functional perspective and use case sc
 
 ## License
 
-This project is licensed under the [Mozilla Public License 2.0](LICENSE).  
+This project is licensed under the [Mozilla Public License 2.0](LICENSE).
 
 ---
