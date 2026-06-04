@@ -14,5 +14,8 @@ To know more about implementation, refer [here](biosdk-client/README.md).
 
 • If you have questions or encounter issues, visit the [MOSIP Community](https://community.mosip.io/) for support.
 
+• For any GitHub issues: [Report here](https://github.com/mosip/biosdk-client/issues)
+
+
 ### License
 This project is licensed under the terms of [Mozilla Public License 2.0](LICENSE).
