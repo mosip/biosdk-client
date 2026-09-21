@@ -1,7 +1,7 @@
-# `biosdk-client/`
+# Java (`biosdk-client/`)
 
-`Client_V_1_0` HTTP `IBioApiV2`. `1.4.1-SNAPSHOT`. `kernel-core` 1.4.1-SNAPSHOT only. Jackson 2 = `spring-boot-jackson2`. No `kernel-bom`.
+`Client_V_1_0` HTTP `IBioApiV2` `1.4.1-SNAPSHOT`. `kernel-core` 1.4.1-SNAPSHOT compile. `spring-boot-jackson2`. No `kernel-bom`.
 
-`mvn clean install "-Dgpg.skip=true"` · `run-local.bat|sh` `init|test|all` · MockWebServer `:9098`. Unset `mosip_biosdk_service` for tests. No BioSDK server.
+`mvn clean install "-Dgpg.skip=true"` · quote `-D` in PowerShell. `run-local.bat|sh` `init|test|all`. Unset `mosip_biosdk_service` for tests. `:9098`. No BioSDK server.
 
-Ops: DTO → Base64 `request` → `Util.restRequest` → top-level `errors`. URLs `format.url.{format|default}`. Flags `{FINGER|IRIS|FACE}.format`. HttpClient 5, `HttpEntity(HttpHeaders)`, SSL bypass default on. No HttpClient 4.
+Envelope: Base64 `request`, top-level `errors`. `format.url.{format|default}` · `{FINGER|IRIS|FACE}.format`. HttpClient 5 · `HttpEntity(HttpHeaders)` · SSL bypass on · no 503 retry · no HC4.
