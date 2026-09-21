@@ -1,14 +1,14 @@
 THIRD-PARTY-NOTICES
 
-This project uses third-party components under licenses that require attribution.
+This project uses third-party components under MOSIP-approved licenses
+(compatible with MPL 2.0 and allowed with MOSIP). Attribution required for Apache-2.0.
 
-- MOSIP Kernel Libraries – Mozilla Public License 2.0
-- Project Lombok – MIT License
-- Mockito Core – MIT License
-- JUnit Jupiter API – Eclipse Public License 2.0
-- JUnit Jupiter Engine – Eclipse Public License 2.0
-- JUnit Vintage Engine – Eclipse Public License 2.0
-- Git Commit Id Maven Plugin – GNU Lesser General Public License 3.0
+- MOSIP kernel-core, kernel-biometrics-api – Mozilla Public License 2.0
+- Spring Framework / Spring Boot 4.1.1, Jackson 2.22.2, HttpClient 5, Apache Commons, Gson, JSON.simple, Logstash encoder 8.1, Maven plugins – Apache License 2.0
+- Project Lombok 1.18.48, SLF4J – MIT License
+- JAXB runtime 2.3.9 – Eclipse Distribution License 1.0 (BSD-3-Clause)
+
+EPL, LGPLv3, GPLv2, GPLv3, AGPLv3, and Creative Commons are not combined into this product.
 
 MOSIP COPYRIGHT NOTICE
-© 2018–2025 MOSIP (Modular Open Source Identity Platform)
+© 2018–2026 MOSIP (Modular Open Source Identity Platform)

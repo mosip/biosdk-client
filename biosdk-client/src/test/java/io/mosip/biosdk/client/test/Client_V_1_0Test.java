@@ -1,11 +1,12 @@
 package io.mosip.biosdk.client.test;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.spy;
 
@@ -460,6 +461,8 @@ class Client_V_1_0Test {
 
 	@Test
 	void testGetSdkUrls_NoValidUrlsThrowsException() throws Exception {
+		assumeTrue(System.getenv("mosip_biosdk_service") == null && System.getenv("MOSIP_BIOSDK_SERVICE") == null,
+				"unset mosip_biosdk_service — it is used as the default SDK URL");
 		Client_V_1_0 client = new Client_V_1_0();
 
 		// Prepare input without any valid URLs
@@ -561,6 +564,8 @@ class Client_V_1_0Test {
 
 	@Test
 	void testGetDefaultSdkServiceUrlFromEnv_NoValue() throws Exception {
+		assumeTrue(System.getenv("mosip_biosdk_service") == null && System.getenv("MOSIP_BIOSDK_SERVICE") == null,
+				"unset mosip_biosdk_service — this test requires it to be absent");
 		Client_V_1_0 client = new Client_V_1_0();
 
 		// Clear system property and environment variable
@@ -614,6 +619,7 @@ class Client_V_1_0Test {
 
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("format.url.test", mockWebServer.url("/biosdk-service").toString());
+		initParams.put("format.url.default", mockWebServer.url("/biosdk-service").toString());
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 			@Override
@@ -754,6 +760,7 @@ class Client_V_1_0Test {
 
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("format.url.test", mockWebServer.url("/biosdk-service").toString());
+		initParams.put("format.url.default", mockWebServer.url("/biosdk-service").toString());
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 			@Override
@@ -793,6 +800,7 @@ class Client_V_1_0Test {
 
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("format.url.test", mockWebServer.url("/biosdk-service").toString());
+		initParams.put("format.url.default", mockWebServer.url("/biosdk-service").toString());
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 			@Override
@@ -833,6 +841,7 @@ class Client_V_1_0Test {
 
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("format.url.test", mockWebServer.url("/biosdk-service").toString());
+		initParams.put("format.url.default", mockWebServer.url("/biosdk-service").toString());
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 			@Override
@@ -871,6 +880,7 @@ class Client_V_1_0Test {
 
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("format.url.test", mockWebServer.url("/biosdk-service").toString());
+		initParams.put("format.url.default", mockWebServer.url("/biosdk-service").toString());
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 			@Override
@@ -909,6 +919,7 @@ class Client_V_1_0Test {
 
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("format.url.test", mockWebServer.url("/biosdk-service").toString());
+		initParams.put("format.url.default", mockWebServer.url("/biosdk-service").toString());
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 			@Override
@@ -950,6 +961,7 @@ class Client_V_1_0Test {
 
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("format.url.test", mockWebServer.url("/biosdk-service").toString());
+		initParams.put("format.url.default", mockWebServer.url("/biosdk-service").toString());
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 			@Override
@@ -991,6 +1003,7 @@ class Client_V_1_0Test {
 
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("format.url.test", mockWebServer.url("/biosdk-service").toString());
+		initParams.put("format.url.default", mockWebServer.url("/biosdk-service").toString());
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 			@Override
@@ -1259,6 +1272,7 @@ class Client_V_1_0Test {
 		Client_V_1_0 client = new Client_V_1_0();
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("format.url.test", mockWebServer.url("/biosdk-service").toString());
+		initParams.put("format.url.default", mockWebServer.url("/biosdk-service").toString());
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 			@Override
@@ -1292,6 +1306,7 @@ class Client_V_1_0Test {
 
 		Map<String, String> initParams = new HashMap<>();
 		initParams.put("format.url.test", mockWebServer.url("/biosdk-service").toString());
+		initParams.put("format.url.default", mockWebServer.url("/biosdk-service").toString());
 
 		mockWebServer.setDispatcher(new Dispatcher() {
 			@Override

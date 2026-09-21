@@ -34,8 +34,8 @@ public final class LoggerConfig {
 		mosipRollingFileAppender = new RollingFileAppender();
 		mosipRollingFileAppender.setAppend(true);
 		mosipRollingFileAppender.setAppenderName("fileappender");
-		mosipRollingFileAppender.setFileName("./logs/biosdk-client.log");
-		mosipRollingFileAppender.setFileNamePattern("./logs/biosdk-client-%d{yyyy-MM-dd}-%i.log");
+		mosipRollingFileAppender.setFileName("./.local/logs/biosdk-client.log");
+		mosipRollingFileAppender.setFileNamePattern("./.local/logs/biosdk-client-%d{yyyy-MM-dd}-%i.log");
 		mosipRollingFileAppender.setImmediateFlush(true);
 		mosipRollingFileAppender.setMaxFileSize("50mb");
 		mosipRollingFileAppender.setPrudent(false);
