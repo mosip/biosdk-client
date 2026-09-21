@@ -27,6 +27,12 @@ public class InitRequestDto {
 	 */
 	private Map<String, String> initParams;
 
+	/**
+	 * Value equality on {@link #initParams}.
+	 *
+	 * @param o other object
+	 * @return {@code true} if maps are equal
+	 */
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -37,11 +43,22 @@ public class InitRequestDto {
 		return Objects.equals(initParams, that.initParams);
 	}
 
+	/**
+	 * Hash of {@link #initParams}.
+	 *
+	 * @return hash code
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(initParams);
 	}
 
+	/**
+	 * Lombok-style type check used by generated equals.
+	 *
+	 * @param other candidate
+	 * @return {@code true} if {@code other} is this DTO type
+	 */
 	public boolean canEqual(Object other) {
 		return other instanceof InitRequestDto;
 	}

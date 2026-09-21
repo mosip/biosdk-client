@@ -52,16 +52,26 @@ import io.mosip.kernel.core.logger.spi.Logger;
  */
 public final class Util {
 
+	/** Logger used for HTTP debug and RestTemplate setup. */
 	private static final Logger UTIL_LOGGER = LoggerConfig.logConfig(Util.class);
 
+	/** System property for HttpClient max connections per route. Default {@code 20}. */
 	private static final String MAX_CONN_PER_ROUTE = "restTemplate-max-connection-per-route";
+	/** System property for HttpClient total max connections. Default {@code 100}. */
 	private static final String MAX_TOT_CONN = "restTemplate-total-max-connections";
+	/** System property to trust-all TLS and skip hostname verify. Default {@code true}. */
 	private static final String SSL_BYPASS = "restTemplate-ssl-bypass";
 
+	/** Singleton {@link RestTemplate} backed by Apache HttpClient 5. */
 	private static RestTemplate restTemplate;
+	/** Singleton Jackson 2 mapper with Afterburner. */
 	private static ObjectMapper mapper;
+	/** Default SSL bypass when {@link #SSL_BYPASS} is unset. */
 	private static boolean sslBypass = true;
 
+	/**
+	 * Prevents instantiation; all members are static.
+	 */
 	private Util() {
 	}
 
@@ -122,6 +132,15 @@ public final class Util {
 		}
 	}
 
+	/**
+	 * Builds or returns the pooled HttpClient 5 {@link RestTemplate}.
+	 * Automatic retries are off. Connect timeout 5s, socket/response timeout 30s.
+	 *
+	 * @return shared RestTemplate
+	 * @throws NoSuchAlgorithmException if the TLS context cannot be created
+	 * @throws KeyStoreException        if trust material cannot be loaded
+	 * @throws KeyManagementException   if the SSL context cannot be initialized
+	 */
 	private static synchronized RestTemplate getRestTemplate()
 			throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
 		if (restTemplate == null) {
@@ -170,6 +189,11 @@ public final class Util {
 		return restTemplate;
 	}
 
+	/**
+	 * Reads {@link #MAX_CONN_PER_ROUTE} or returns {@code 20}.
+	 *
+	 * @return max connections per route
+	 */
 	private static Integer getMaxConnectionPerRouteFromEnv() {
 		Integer value = System.getProperty(MAX_CONN_PER_ROUTE) != null
 				? Integer.parseInt(System.getProperty(MAX_CONN_PER_ROUTE))
@@ -178,6 +202,11 @@ public final class Util {
 		return value;
 	}
 
+	/**
+	 * Reads {@link #MAX_TOT_CONN} or returns {@code 100}.
+	 *
+	 * @return total max connections
+	 */
 	private static Integer getTotalMaxConnectionsFromEnv() {
 		Integer value = System.getProperty(MAX_TOT_CONN) != null
 				? Integer.parseInt(System.getProperty(MAX_TOT_CONN))
@@ -186,6 +215,11 @@ public final class Util {
 		return value;
 	}
 
+	/**
+	 * Reads {@link #SSL_BYPASS} or returns {@link #sslBypass}.
+	 *
+	 * @return {@code true} to skip TLS trust and hostname checks
+	 */
 	private static Boolean getSSLBypassFromEnv() {
 		Boolean value = System.getProperty(SSL_BYPASS) != null
 				? BooleanUtils.toBoolean(System.getProperty(SSL_BYPASS))
@@ -194,10 +228,22 @@ public final class Util {
 		return value;
 	}
 
+	/**
+	 * Encodes UTF-8 bytes of {@code data} as a Base64 string (request envelope).
+	 *
+	 * @param data JSON (or other text) to encode
+	 * @return Base64 with no line wraps
+	 */
 	public static String base64Encode(String data) {
 		return Base64.getEncoder().encodeToString(data.getBytes());
 	}
 
+	/**
+	 * Debug flag {@code mosip_biosdk_request_response_debug} from system property, then env.
+	 * Value {@code y} logs request and response JSON.
+	 *
+	 * @return the flag, or {@code null} if unset
+	 */
 	public static String getDebugRequestResponse() {
 		String property = System.getProperty("mosip_biosdk_request_response_debug");
 		return property != null ? property : System.getenv("mosip_biosdk_request_response_debug");

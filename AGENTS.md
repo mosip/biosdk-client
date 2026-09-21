@@ -1,15 +1,14 @@
 # MOSIP BioSDK Client
 
-IBioApiV2 HTTP proxy library. **No local biometric algorithms.** JDK 21, Boot 4.1.1.
+Library: HTTP `IBioApiV2`. No local biometrics. JDK 21, Boot 4.1.1.
 
 | Work | Folder |
 |------|--------|
-| Java / Maven | `biosdk-client/` |
+| Java | `biosdk-client/` |
 | CI | `.github/` |
 
-Build: `cd biosdk-client && mvn clean install "-Dgpg.skip=true"`
-Tests: MockWebServer **:9098** (`mvn test` / `run-local.bat test`). No Docker stack.
+`cd biosdk-client && mvn clean install "-Dgpg.skip=true"` · tests MockWebServer `:9098` (`run-local.bat test`). No Docker.
 
-**Budget:** one folder; that folder’s `AGENTS.md` only. Grep/Glob first. Short reads. No subagents. Do not open README, LICENSE, NOTICE, THIRD-PARTY*, `target/`, `.local/`, logs, apidocs unless asked. Skip `*.iso`, `*.jar`, `*.zip`, javadoc. Answer first. Short.
+**Budget:** one folder. Read only that `AGENTS.md`. Grep/Glob, short reads. No subagents, no repo walks. Skip README, LICENSE, NOTICE, THIRD-PARTY*, `target/`, `.local/`, logs, apidocs, `*.iso`, jars, zips unless asked. Answer first. Short.
 
-**Freeze:** IBioApiV2 + envelope (`request` Base64, top-level `errors`). `convertFormatV2`. `HttpEntity(HttpHeaders)`. No `kernel-bom`. No GPG keys / `mosip_biosdk_service` secrets.
+**Freeze:** IBioApiV2 + envelope (`request` Base64, top-level `errors`). `convertFormatV2`. `HttpEntity(HttpHeaders)`. `spring-boot-jackson2`. No `kernel-bom`. No GPG keys / `mosip_biosdk_service` secrets.

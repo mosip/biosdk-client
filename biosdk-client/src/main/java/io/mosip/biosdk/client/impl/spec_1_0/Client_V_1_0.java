@@ -34,53 +34,82 @@ import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_IDTYPE;
 import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_SESSIONID;
 
 /**
- * The Class BioApiImpl.
+ * HTTP implementation of {@link IBioApiV2}.
+ * <p>
+ * Every biometric operation is a {@code POST} to an external Bio-SDK REST
+ * service. This class does not run match, extract, segment, quality, or convert
+ * locally. The JSON envelope uses a Base64 {@code request} payload and
+ * top-level {@code errors}.
+ * </p>
  *
  * @author Sanjay Murali
  * @author Manoj SP
  * @author Ankit
  * @author Loganathan Sekar
+ * @since 1.0.0
  */
 public class Client_V_1_0 implements IBioApiV2 {
+    /** Logger bound to this client. */
     private static Logger logger = LoggerConfig.logConfig(Client_V_1_0.class);
 
+    /** Suffix appended to a modality name to read the format flag (for example {@code FINGER.format}). */
     private static final String FORMAT_SUFFIX = ".format";
 
+    /** Key used for the default SDK URL when no modality-specific format is set. */
     private static final String DEFAULT = "default";
 
+    /** Prefix of {@code initParams} keys that hold Bio-SDK REST URLs ({@code format.url.{name}}). */
     private static final String FORMAT_URL_PREFIX = "format.url.";
 
+    /** Prefix of {@code initParams} keys copied to system properties ({@code config.parameter.{name}}). */
     private static final String PARAMETER_PREFIX = "config.parameter.";
 
+    /** Environment / system-property name used as the fallback SDK URL. */
     private static final String MOSIP_BIOSDK_SERVICE = "mosip_biosdk_service";
 
+    /** Envelope version written into every {@link RequestDto}. */
     private static final String VERSION = "1.0";
 
+    /** Jackson type token for deserializing the top-level {@code errors} array. */
     private TypeReference<List<ErrorDto>> errorDtoListTypeRef = new TypeReference<List<ErrorDto>>() {
     };
 
+    /** Shared Jackson mapper (Jackson 2). */
     private static final ObjectMapper M = Util.getObjectMapper();
+    /** Reader for {@code List<ErrorDto>}. */
     private static final ObjectReader ERR_LIST_READER =
             M.readerFor(new TypeReference<List<ErrorDto>>() {
             });
+    /** Reader for {@link SDKInfo}. */
     private static final ObjectReader SDKINFO_READER =
             M.readerFor(SDKInfo.class);
+    /** Reader for {@link MatchDecision} arrays. */
     private static final ObjectReader MATCH_DECISIONS_READER =
             M.readerFor(new TypeReference<MatchDecision[]>() {
             });
+    /** Reader for {@link BiometricRecord}. */
     private static final ObjectReader BIOREC_READER =
             M.readerFor(BiometricRecord.class);
+    /** Reader for {@link QualityCheck}. */
     private static final ObjectReader QUALITY_READER =
             M.readerFor(QualityCheck.class);
 
+    /** Resolved format-name to SDK URL map, filled by {@link #init(Map)}. */
     private Map<String, String> sdkUrlsMap;
 
+    /** Log tag for the HTTP URL. */
     private static final String TAG_HTTP_URL = "HTTP url: ";
+    /** Log tag for the HTTP status. */
     private static final String TAG_HTTP_STATUS = "HTTP status: ";
+    /** JSON field name for the top-level errors array. */
     private static final String TAG_ERRORS = "errors";
+    /** JSON field name for the response object. */
     private static final String TAG_RESPONSE = "response";
+    /** JSON field name for status code. */
     private static final String TAG_STATUS_CODE = "statusCode";
+    /** JSON field name for status message. */
     private static final String TAG_STATUS_MESSAGE = "statusMessage";
+    /** Message used when the HTTP body is missing. */
     private static final String TAG_RESPONSE_NULL = "Response body is null";
 
 
