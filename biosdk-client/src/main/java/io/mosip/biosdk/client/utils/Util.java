@@ -3,6 +3,7 @@ package io.mosip.biosdk.client.utils;
 import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_IDTYPE;
 import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_SESSIONID;
 
+import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -16,7 +17,6 @@ import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.client5.http.ssl.DefaultHostnameVerifier;
@@ -61,11 +61,26 @@ public final class Util {
 	private static final String MAX_TOT_CONN = "restTemplate-total-max-connections";
 	/** System property to trust-all TLS and skip hostname verify. Default {@code true}. */
 	private static final String SSL_BYPASS = "restTemplate-ssl-bypass";
+	/** Property / env name that enables request-response JSON debug logs when set to {@code y}. */
+	private static final String DEBUG_KEY = "mosip_biosdk_request_response_debug";
+	/** Cached env value for {@link #DEBUG_KEY}; system property still wins per call. */
+	private static final String DEBUG_ENV = System.getenv(DEBUG_KEY);
+	/** Reused encoder for the Base64 {@code request} envelope. */
+	private static final Base64.Encoder BASE64 = Base64.getEncoder();
+	/** HTTP connect and connection-request timeout. */
+	private static final Timeout CONNECT_TIMEOUT = Timeout.ofSeconds(5);
+	/** HTTP socket / response timeout. */
+	private static final Timeout SOCKET_TIMEOUT = Timeout.ofSeconds(30);
+	/** Shared request config for the pooled HttpClient. */
+	private static final RequestConfig REQUEST_CONFIG = RequestConfig.custom()
+			.setConnectionRequestTimeout(CONNECT_TIMEOUT)
+			.setResponseTimeout(SOCKET_TIMEOUT)
+			.build();
+	/** Shared Jackson 2 mapper with Afterburner (eager, thread-safe after construction). */
+	private static final ObjectMapper MAPPER = createObjectMapper();
 
 	/** Singleton {@link RestTemplate} backed by Apache HttpClient 5. */
-	private static RestTemplate restTemplate;
-	/** Singleton Jackson 2 mapper with Afterburner. */
-	private static ObjectMapper mapper;
+	private static volatile RestTemplate restTemplate;
 	/** Default SSL bypass when {@link #SSL_BYPASS} is unset. */
 	private static boolean sslBypass = true;
 
@@ -76,19 +91,26 @@ public final class Util {
 	}
 
 	/**
+	 * Builds the shared Jackson 2 {@link ObjectMapper}.
+	 *
+	 * @return configured mapper
+	 */
+	private static ObjectMapper createObjectMapper() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new AfterburnerModule());
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		return objectMapper;
+	}
+
+	/**
 	 * Provides a singleton {@link ObjectMapper} configured for BioSDK usage.
 	 *
 	 * @return Configured {@link ObjectMapper} instance.
 	 */
 	public static ObjectMapper getObjectMapper() {
-		if (mapper == null) {
-			mapper = new ObjectMapper();
-			mapper.registerModule(new AfterburnerModule());
-			mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-			mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-			mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-		}
-		return mapper;
+		return MAPPER;
 	}
 
 	/**
@@ -113,17 +135,17 @@ public final class Util {
 			}
 			HttpEntity<?> entity = body != null ? new HttpEntity<>(body, headers) : new HttpEntity<>(headers);
 
-			String debugFlag = getDebugRequestResponse();
-			if ("y".equalsIgnoreCase(debugFlag)) {
+			boolean debug = isHttpDebug();
+			if (debug) {
 				UTIL_LOGGER.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "Request: ",
-						getObjectMapper().writeValueAsString(entity.getBody()));
+						MAPPER.writeValueAsString(entity.getBody()));
 			}
 
 			ResponseEntity<?> response = getRestTemplate().exchange(url, httpMethodType, entity, responseClass);
 
-			if ("y".equalsIgnoreCase(debugFlag)) {
+			if (debug) {
 				UTIL_LOGGER.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "Response: ",
-						getObjectMapper().writeValueAsString(response.getBody()));
+						MAPPER.writeValueAsString(response.getBody()));
 			}
 			return response;
 		} catch (Exception ex) {
@@ -141,52 +163,50 @@ public final class Util {
 	 * @throws KeyStoreException        if trust material cannot be loaded
 	 * @throws KeyManagementException   if the SSL context cannot be initialized
 	 */
-	private static synchronized RestTemplate getRestTemplate()
+	private static RestTemplate getRestTemplate()
 			throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-		if (restTemplate == null) {
-			PoolingHttpClientConnectionManager connectionManager;
+		RestTemplate local = restTemplate;
+		if (local != null) {
+			return local;
+		}
+		synchronized (Util.class) {
+			local = restTemplate;
+			if (local != null) {
+				return local;
+			}
+			int maxPerRoute = getMaxConnectionPerRouteFromEnv();
+			int maxTotal = getTotalMaxConnectionsFromEnv();
+			ConnectionConfig connectionConfig = ConnectionConfig.custom()
+					.setConnectTimeout(CONNECT_TIMEOUT)
+					.setSocketTimeout(SOCKET_TIMEOUT)
+					.build();
+			PoolingHttpClientConnectionManagerBuilder managerBuilder = PoolingHttpClientConnectionManagerBuilder.create()
+					.setMaxConnPerRoute(maxPerRoute)
+					.setMaxConnTotal(maxTotal)
+					.setDefaultConnectionConfig(connectionConfig);
 			if (Boolean.TRUE.equals(getSSLBypassFromEnv())) {
 				SSLContext sslContext = SSLContexts.custom()
 						.loadTrustMaterial(null, (chain, authType) -> true)
 						.build();
-				connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-						.setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContext, NoopHostnameVerifier.INSTANCE))
-						.setMaxConnPerRoute(getMaxConnectionPerRouteFromEnv())
-						.setMaxConnTotal(getTotalMaxConnectionsFromEnv())
-						.setDefaultConnectionConfig(ConnectionConfig.custom()
-								.setConnectTimeout(Timeout.ofSeconds(5))
-								.setSocketTimeout(Timeout.ofSeconds(30))
-								.build())
-						.build();
+				managerBuilder.setTlsSocketStrategy(
+						new DefaultClientTlsStrategy(sslContext, NoopHostnameVerifier.INSTANCE));
 			} else {
-				connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-						.setTlsSocketStrategy(new DefaultClientTlsStrategy(SSLContexts.createSystemDefault(),
-								new DefaultHostnameVerifier()))
-						.setMaxConnPerRoute(getMaxConnectionPerRouteFromEnv())
-						.setMaxConnTotal(getTotalMaxConnectionsFromEnv())
-						.setDefaultConnectionConfig(ConnectionConfig.custom()
-								.setConnectTimeout(Timeout.ofSeconds(5))
-								.setSocketTimeout(Timeout.ofSeconds(30))
-								.build())
-						.build();
+				managerBuilder.setTlsSocketStrategy(new DefaultClientTlsStrategy(SSLContexts.createSystemDefault(),
+						new DefaultHostnameVerifier()));
 			}
 
 			CloseableHttpClient httpClient = HttpClients.custom()
-					.setConnectionManager(connectionManager)
-					.setDefaultRequestConfig(RequestConfig.custom()
-							.setConnectionRequestTimeout(Timeout.ofSeconds(5))
-							.setResponseTimeout(Timeout.ofSeconds(30))
-							.build())
+					.setConnectionManager(managerBuilder.build())
+					.setDefaultRequestConfig(REQUEST_CONFIG)
 					.disableAutomaticRetries()
 					.disableCookieManagement()
 					.evictExpiredConnections()
 					.build();
 
-			HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(
-					httpClient);
-			restTemplate = new RestTemplate(requestFactory);
+			local = new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));
+			restTemplate = local;
+			return local;
 		}
-		return restTemplate;
 	}
 
 	/**
@@ -194,11 +214,10 @@ public final class Util {
 	 *
 	 * @return max connections per route
 	 */
-	private static Integer getMaxConnectionPerRouteFromEnv() {
-		Integer value = System.getProperty(MAX_CONN_PER_ROUTE) != null
-				? Integer.parseInt(System.getProperty(MAX_CONN_PER_ROUTE))
-				: 20;
-		UTIL_LOGGER.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "Maximum Connection per Host: ", value.toString());
+	private static int getMaxConnectionPerRouteFromEnv() {
+		String property = System.getProperty(MAX_CONN_PER_ROUTE);
+		int value = property != null ? Integer.parseInt(property) : 20;
+		UTIL_LOGGER.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "Maximum Connection per Host: ", Integer.toString(value));
 		return value;
 	}
 
@@ -207,11 +226,10 @@ public final class Util {
 	 *
 	 * @return total max connections
 	 */
-	private static Integer getTotalMaxConnectionsFromEnv() {
-		Integer value = System.getProperty(MAX_TOT_CONN) != null
-				? Integer.parseInt(System.getProperty(MAX_TOT_CONN))
-				: 100;
-		UTIL_LOGGER.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "Total Maximum Connection: ", value.toString());
+	private static int getTotalMaxConnectionsFromEnv() {
+		String property = System.getProperty(MAX_TOT_CONN);
+		int value = property != null ? Integer.parseInt(property) : 100;
+		UTIL_LOGGER.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "Total Maximum Connection: ", Integer.toString(value));
 		return value;
 	}
 
@@ -221,9 +239,8 @@ public final class Util {
 	 * @return {@code true} to skip TLS trust and hostname checks
 	 */
 	private static Boolean getSSLBypassFromEnv() {
-		Boolean value = System.getProperty(SSL_BYPASS) != null
-				? BooleanUtils.toBoolean(System.getProperty(SSL_BYPASS))
-				: sslBypass;
+		String property = System.getProperty(SSL_BYPASS);
+		Boolean value = property != null ? BooleanUtils.toBoolean(property) : sslBypass;
 		UTIL_LOGGER.debug(LOGGER_SESSIONID, LOGGER_IDTYPE, "SSL Bypass Flag: ", value.toString());
 		return value;
 	}
@@ -235,7 +252,17 @@ public final class Util {
 	 * @return Base64 with no line wraps
 	 */
 	public static String base64Encode(String data) {
-		return Base64.getEncoder().encodeToString(data.getBytes());
+		return BASE64.encodeToString(data.getBytes(StandardCharsets.UTF_8));
+	}
+
+	/**
+	 * Encodes raw JSON bytes as a Base64 string (request envelope).
+	 *
+	 * @param data JSON bytes to encode
+	 * @return Base64 with no line wraps
+	 */
+	public static String base64EncodeBytes(byte[] data) {
+		return BASE64.encodeToString(data);
 	}
 
 	/**
@@ -245,7 +272,17 @@ public final class Util {
 	 * @return the flag, or {@code null} if unset
 	 */
 	public static String getDebugRequestResponse() {
-		String property = System.getProperty("mosip_biosdk_request_response_debug");
-		return property != null ? property : System.getenv("mosip_biosdk_request_response_debug");
+		String property = System.getProperty(DEBUG_KEY);
+		return property != null ? property : DEBUG_ENV;
+	}
+
+	/**
+	 * {@code true} when request/response JSON should be logged.
+	 *
+	 * @return whether debug logging is on
+	 */
+	private static boolean isHttpDebug() {
+		String flag = getDebugRequestResponse();
+		return flag != null && flag.equalsIgnoreCase("y");
 	}
 }

@@ -16,7 +16,7 @@
 	<version>1.4.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>biosdk-client</name>
-	<description>HTTP IBioApiV2 client (library) for MOSIP Bio-SDK REST</description>
+	<description>Sample implementation of biometrics SDK client</description>
 	<url>https://github.com/mosip/biosdk-client</url>
 
 	<!--
@@ -39,7 +39,7 @@
 		<maven.jar.plugin.version>3.5.1</maven.jar.plugin.version>
 		<maven.surefire.plugin.version>3.6.0</maven.surefire.plugin.version>
 		<maven.jacoco.version>0.8.15</maven.jacoco.version>
-		<maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
+		<maven.compiler.plugin.version>3.16.0</maven.compiler.plugin.version>
 		<maven.sonar.plugin.version>5.8.0.7211</maven.sonar.plugin.version>
 		<maven.javadoc.version>3.12.0</maven.javadoc.version>
 		<maven.deploy.plugin.version>3.2.0</maven.deploy.plugin.version>
@@ -53,7 +53,7 @@
 		<!-- kattu maven-build greps pl.project13.maven:git-commit-id-plugin; do not rename. -->
 		<git.commit.id.plugin.version>4.9.10</git.commit.id.plugin.version>
 		<central.publishing.maven.plugin.version>0.11.0</central.publishing.maven.plugin.version>
-		<maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
+		<maven.assembly.plugin.version>3.8.0</maven.assembly.plugin.version>
 		<sonar.coverage.exclusions>**/constant/**,**/dto/**</sonar.coverage.exclusions>
 		<sonar.cpd.exclusions>**/dto/**,**/config/**</sonar.cpd.exclusions>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
@@ -438,7 +438,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>${maven-compiler-plugin.version}</version>
+				<version>${maven.compiler.plugin.version}</version>
 				<configuration>
 					<parameters>true</parameters>
 					<annotationProcessorPathsUseDepMgmt>true</annotationProcessorPathsUseDepMgmt>
@@ -591,7 +591,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>${maven-assembly-plugin.version}</version>
+				<version>${maven.assembly.plugin.version}</version>
 				<configuration>
 					<archive>
 						<manifest>

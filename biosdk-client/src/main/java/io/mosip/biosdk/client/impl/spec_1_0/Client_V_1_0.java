@@ -28,7 +28,6 @@ import org.springframework.http.ResponseEntity;
 import java.io.IOException;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_IDTYPE;
 import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_SESSIONID;
@@ -50,7 +49,7 @@ import static io.mosip.biosdk.client.constant.AppConstants.LOGGER_SESSIONID;
  */
 public class Client_V_1_0 implements IBioApiV2 {
     /** Logger bound to this client. */
-    private static Logger logger = LoggerConfig.logConfig(Client_V_1_0.class);
+    private static final Logger logger = LoggerConfig.logConfig(Client_V_1_0.class);
 
     /** Suffix appended to a modality name to read the format flag (for example {@code FINGER.format}). */
     private static final String FORMAT_SUFFIX = ".format";
@@ -69,6 +68,13 @@ public class Client_V_1_0 implements IBioApiV2 {
 
     /** Envelope version written into every {@link RequestDto}. */
     private static final String VERSION = "1.0";
+
+    /** Lowercase {@link BiometricType#FINGER} name used when scanning flag keys. */
+    private static final String FINGER_LC = BiometricType.FINGER.name().toLowerCase(Locale.ROOT);
+    /** Lowercase {@link BiometricType#IRIS} name used when scanning flag keys. */
+    private static final String IRIS_LC = BiometricType.IRIS.name().toLowerCase(Locale.ROOT);
+    /** Lowercase {@link BiometricType#FACE} name used when scanning flag keys. */
+    private static final String FACE_LC = BiometricType.FACE.name().toLowerCase(Locale.ROOT);
 
     /** Jackson type token for deserializing the top-level {@code errors} array. */
     private TypeReference<List<ErrorDto>> errorDtoListTypeRef = new TypeReference<List<ErrorDto>>() {
@@ -123,10 +129,10 @@ public class Client_V_1_0 implements IBioApiV2 {
     public SDKInfo init(Map<String, String> initParams) {
         sdkUrlsMap = getSdkUrls(initParams);
         setConfigParameters(initParams);
-        List<SDKInfo> sdkInfos = sdkUrlsMap.values()
-                .stream()
-                .map(sdkUrl -> initForSdkUrl(initParams, sdkUrl))
-                .collect(Collectors.toList());
+        List<SDKInfo> sdkInfos = new ArrayList<>(sdkUrlsMap.size());
+        for (String sdkUrl : sdkUrlsMap.values()) {
+            sdkInfos.add(initForSdkUrl(initParams, sdkUrl));
+        }
         return getAggregatedSdkInfo(sdkInfos);
     }
 
@@ -136,14 +142,11 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @param initParams A map of key-value pairs where keys containing the defined prefix will be set as system properties.
      */
     private void setConfigParameters(Map<String, String> initParams) {
-        Map<String, String> parametersMap = new HashMap<>(initParams.entrySet()
-                .stream()
-                .filter(entry -> entry.getKey().contains(PARAMETER_PREFIX))
-                .collect(Collectors.toMap(entry -> entry.getKey()
-                        .substring(PARAMETER_PREFIX.length()), Entry::getValue)));
-
-        for (Map.Entry<String, String> map : parametersMap.entrySet()) {
-            System.setProperty(map.getKey(), map.getValue());
+        for (Entry<String, String> entry : initParams.entrySet()) {
+            String key = entry.getKey();
+            if (key.contains(PARAMETER_PREFIX)) {
+                System.setProperty(key.substring(PARAMETER_PREFIX.length()), entry.getValue());
+            }
         }
     }
 
@@ -199,10 +202,11 @@ public class Client_V_1_0 implements IBioApiV2 {
         }
         if (sdkInfo.getSupportedModalities() != null) {
             List<BiometricType> supportedModalities = aggregatedSdkInfo.getSupportedModalities();
-            supportedModalities.addAll(sdkInfo.getSupportedModalities()
-                    .stream()
-                    .filter(s -> !supportedModalities.contains(s))
-                    .collect(Collectors.toList()));
+            for (BiometricType modality : sdkInfo.getSupportedModalities()) {
+                if (!supportedModalities.contains(modality)) {
+                    supportedModalities.add(modality);
+                }
+            }
         }
     }
 
@@ -251,11 +255,13 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @throws IllegalStateException if no valid SDK service URL is configured.
      */
     private Map<String, String> getSdkUrls(Map<String, String> initParams) {
-        Map<String, String> sdkUrls = new HashMap<>(initParams.entrySet()
-                .stream()
-                .filter(entry -> entry.getKey().contains(FORMAT_URL_PREFIX))
-                .collect(Collectors.toMap(entry -> entry.getKey()
-                        .substring(FORMAT_URL_PREFIX.length()), Entry::getValue)));
+        Map<String, String> sdkUrls = new HashMap<>(8);
+        for (Entry<String, String> entry : initParams.entrySet()) {
+            String key = entry.getKey();
+            if (key.contains(FORMAT_URL_PREFIX)) {
+                sdkUrls.put(key.substring(FORMAT_URL_PREFIX.length()), entry.getValue());
+            }
+        }
         if (!sdkUrls.containsKey(DEFAULT)) {
             //If default is not specified in configuration, try getting it from env.
             String defaultSdkServiceUrl = getDefaultSdkServiceUrlFromEnv();
@@ -285,28 +291,39 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @return The corresponding SDK service URL for the modality or the default URL if none found.
      */
     private String getSdkServiceUrl(BiometricType modality, Map<String, String> flags) {
-        if (modality != null) {
-            String key = modality.name() + FORMAT_SUFFIX;
-            if (flags != null) {
-                Optional<String> formatFromFlag = flags.entrySet()
-                        .stream()
-                        .filter(e -> e.getKey().equalsIgnoreCase(key))
-                        .findAny()
-                        .map(Entry::getValue);
-                if (formatFromFlag.isPresent()) {
-                    String format = formatFromFlag.get();
-                    Optional<String> urlForFormat = sdkUrlsMap.entrySet()
-                            .stream()
-                            .filter(e -> e.getKey().equalsIgnoreCase(format))
-                            .findAny()
-                            .map(Entry::getValue);
-                    if (urlForFormat.isPresent()) {
-                        return urlForFormat.get();
-                    }
+        if (modality != null && flags != null) {
+            String format = getIgnoreCase(flags, modality.name() + FORMAT_SUFFIX);
+            if (format != null) {
+                String url = getIgnoreCase(sdkUrlsMap, format);
+                if (url != null) {
+                    return url;
                 }
             }
         }
         return getDefaultSdkServiceUrl();
+    }
+
+    /**
+     * Map lookup with an exact get first, then a case-insensitive scan.
+     *
+     * @param map source map (nullable)
+     * @param key lookup key (nullable)
+     * @return matching value, or {@code null}
+     */
+    private static String getIgnoreCase(Map<String, String> map, String key) {
+        if (map == null || key == null) {
+            return null;
+        }
+        String value = map.get(key);
+        if (value != null) {
+            return value;
+        }
+        for (Entry<String, String> entry : map.entrySet()) {
+            if (key.equalsIgnoreCase(entry.getKey())) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 
     /**
@@ -324,10 +341,8 @@ public class Client_V_1_0 implements IBioApiV2 {
      * @return The default SDK service URL from environment variables, or null if not defined.
      */
     private String getDefaultSdkServiceUrlFromEnv() {
-        if (System.getProperty(MOSIP_BIOSDK_SERVICE) != null)
-            return System.getProperty(MOSIP_BIOSDK_SERVICE);
-
-        return System.getenv(MOSIP_BIOSDK_SERVICE);
+        String property = System.getProperty(MOSIP_BIOSDK_SERVICE);
+        return property != null ? property : System.getenv(MOSIP_BIOSDK_SERVICE);
     }
 
     /**
@@ -466,16 +481,17 @@ public class Client_V_1_0 implements IBioApiV2 {
     private String getSdkServiceUrl(List<BiometricType> modalitiesToExtract, Map<String, String> flags) {
         if (modalitiesToExtract != null && !modalitiesToExtract.isEmpty()) {
             return getSdkServiceUrl(modalitiesToExtract.get(0), flags);
-        } else {
-            Set<String> keySet = flags.keySet();
-            for (String key : keySet) {
-                if (key.toLowerCase().contains(BiometricType.FINGER.name().toLowerCase())) {
-                    return getSdkServiceUrl(BiometricType.FINGER, flags);
-                } else if (key.toLowerCase().contains(BiometricType.IRIS.name().toLowerCase())) {
-                    return getSdkServiceUrl(BiometricType.IRIS, flags);
-                } else if (key.toLowerCase().contains(BiometricType.FACE.name().toLowerCase())) {
-                    return getSdkServiceUrl(BiometricType.FACE, flags);
-                }
+        }
+        for (String key : flags.keySet()) {
+            String lower = key.toLowerCase(Locale.ROOT);
+            if (lower.contains(FINGER_LC)) {
+                return getSdkServiceUrl(BiometricType.FINGER, flags);
+            }
+            if (lower.contains(IRIS_LC)) {
+                return getSdkServiceUrl(BiometricType.IRIS, flags);
+            }
+            if (lower.contains(FACE_LC)) {
+                return getSdkServiceUrl(BiometricType.FACE, flags);
             }
         }
         return getDefaultSdkServiceUrl();
@@ -579,9 +595,9 @@ public class Client_V_1_0 implements IBioApiV2 {
             JSONObject js = (JSONObject) parser.parse(responseBody);
 
             /* Error handler */
-            errorHandler(js.get("errors") != null ? Util.getObjectMapper().readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
+            errorHandler(js.get("errors") != null ? M.readValue(js.get("errors").toString(), errorDtoListTypeRef) : null);
 
-            resBiometricRecord = Util.getObjectMapper().readValue(js.get("response").toString(), new TypeReference<BiometricRecord>() {
+            resBiometricRecord = M.readValue(js.get("response").toString(), new TypeReference<BiometricRecord>() {
             });
         } catch (Exception e) {
             logger.error(LOGGER_SESSIONID, LOGGER_IDTYPE, "error", e);
@@ -641,17 +657,16 @@ public class Client_V_1_0 implements IBioApiV2 {
     }
 
     /**
-     * Generates a new {@link RequestDto} object by encoding the provided body as a Base64 string.
-     * This ensures that the request payload is safely encoded before sending to the SDK service.
+     * Builds a {@link RequestDto} by serializing {@code body} to UTF-8 JSON bytes and Base64-encoding them.
      *
      * @param body The request body object to encode.
      * @return A new {@link RequestDto} containing the encoded request.
-     * @throws JsonProcessingException If the object cannot be converted to a JSON string.
+     * @throws JsonProcessingException If the object cannot be converted to JSON.
      */
     private RequestDto generateNewRequestDto(Object body) throws JsonProcessingException {
         RequestDto requestDto = new RequestDto();
         requestDto.setVersion(VERSION);
-        requestDto.setRequest(Util.base64Encode(Util.getObjectMapper().writeValueAsString(body)));
+        requestDto.setRequest(Util.base64EncodeBytes(M.writeValueAsBytes(body)));
         return requestDto;
     }
 
@@ -728,7 +743,7 @@ public class Client_V_1_0 implements IBioApiV2 {
         out.setStatusMessage(statusMessage);
 
         JsonNode payload =
-                jsonResponse.has("response") ? jsonResponse.get("response") : root.get("response");
+                jsonResponse.has(TAG_RESPONSE) ? jsonResponse.get(TAG_RESPONSE) : root.get(TAG_RESPONSE);
 
         out.setResponse((payload == null || payload.isNull()) ? null : reader.readValue(payload));
     }
