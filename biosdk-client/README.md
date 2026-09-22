@@ -94,12 +94,12 @@ This module is a **library** (no Spring Boot `main`). Exercise it with **local J
 
 | You want | Windows cmd | Linux / macOS / Git Bash |
 |----------|-------------|--------------------------|
-| Help | `run-local.bat` | `./run-local.sh` |
-| Package the JAR | `run-local.bat init` | `./run-local.sh init` |
-| Unit tests | `run-local.bat test` | `./run-local.sh test` |
-| Package + tests | `run-local.bat all` | `./run-local.sh all` |
+| Help | `build.bat` | `./build.sh` |
+| Package the JAR | `build.bat init` | `./build.sh init` |
+| Unit tests | `build.bat test` | `./build.sh test` |
+| Package + tests | `build.bat all` | `./build.sh all` |
 
-`bash` on many Windows PCs is **WSL** and does not inherit Windows `JAVA_HOME`. Prefer **cmd** (or Git Bash). PowerShell: `.\run-local.bat test` and quote `"-Dgpg.skip=true"`.
+`bash` on many Windows PCs is **WSL** and does not inherit Windows `JAVA_HOME`. Prefer **cmd** (or Git Bash). PowerShell: `.\build.bat test` and quote `"-Dgpg.skip=true"`.
 
 ### Prerequisites
 
@@ -114,20 +114,20 @@ No Docker. No PostgreSQL. File logs: `biosdk-client/.local/logs/` (gitignored).
 
 ```bat
 cd biosdk-client
-run-local.bat init
-run-local.bat test
+build.bat init
+build.bat test
 ```
 
 ### Linux / macOS / Git Bash
 
 ```bash
 cd biosdk-client
-chmod +x run-local.sh
-./run-local.sh init
-./run-local.sh test
+chmod +x build.sh
+./build.sh init
+./build.sh test
 ```
 
-### Module runner (`run-local.sh` / `run-local.bat`)
+### Maven wrapper (`build.sh` / `build.bat`)
 
 | Command | What it does |
 |---------|----------------|
@@ -182,7 +182,7 @@ If `format.url.default` is omitted, the client reads env / system property `mosi
 
 | Symptom | What to do |
 |---------|------------|
-| Unit tests POST to a live URL / expect exception but get HTTP 200 | Unset `MOSIP_BIOSDK_SERVICE` in that terminal, then `run-local.bat test` |
+| Unit tests POST to a live URL / expect exception but get HTTP 200 | Unset `MOSIP_BIOSDK_SERVICE` in that terminal, then `build.bat test` |
 | `ClientRealServerTest` skipped | Expected — default suite is MockWebServer only |
 
 ---
@@ -227,10 +227,10 @@ HttpClient 5 automatic retries are **off** (including HTTP 503).
 
 | Class | When it runs |
 |-------|----------------|
-| `Client_V_1_0Test`, `UtilTest`, `DtoTest`, `ExceptionTest`, `ConstantTest` | Default `mvn test` / `run-local.bat test` — MockWebServer **9098** |
+| `Client_V_1_0Test`, `UtilTest`, `DtoTest`, `ExceptionTest`, `ConstantTest` | Default `mvn test` / `build.bat test` — MockWebServer **9098** |
 | `ClientRealServerTest` | Skipped unless `-Dbiosdk.real.server=true` (not part of local unit work) |
 
-`run-local.bat test` / `run-local.sh test` unset `mosip_biosdk_service` in the Maven child process so leftover User env cannot redirect mocks.
+`build.bat test` / `build.sh test` unset `mosip_biosdk_service` in the Maven child process so leftover User env cannot redirect mocks.
 
 ---
 

@@ -4,7 +4,7 @@ HTTP `IBioApiV2` lib. No local biometrics. JDK 21 · Boot 4.1.1.
 
 `biosdk-client/` Java · `.github/` CI
 
-`cd biosdk-client && mvn clean install "-Dgpg.skip=true"` · MockWebServer `:9098` · `run-local.bat|sh` `init|test|all`. No Docker.
+`cd biosdk-client && mvn clean install "-Dgpg.skip=true"` · MockWebServer `:9098` · `build.bat|sh` `init|test|all`. No Docker.
 
 Work: 1 folder · read its `AGENTS.md` · Grep/Glob · short reads · answer first. No subagents, walks, or README/LICENSE/NOTICE/THIRD-PARTY*/`target/`/`.local`/logs/apidocs/`*.iso`/jars/zips unless asked.
 

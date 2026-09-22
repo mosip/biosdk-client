@@ -8,7 +8,7 @@ To know more about Biometric SDK Specification, refer [here](https://docs.mosip.
 
 To know more about implementation, refer [here](biosdk-client/README.md).
 
-Module runner (`init` / `test` / `all`): [`biosdk-client/run-local.sh`](biosdk-client/run-local.sh) · [`biosdk-client/README.md`](biosdk-client/README.md).
+Maven wrapper (`init` / `test` / `all`): [`biosdk-client/build.sh`](biosdk-client/build.sh) · [`biosdk-client/README.md`](biosdk-client/README.md).
 
 Tests are local JUnit (MockWebServer). This library is not run as a Docker service.
 

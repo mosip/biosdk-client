@@ -1,8 +1,8 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
-REM Library runner (no Docker). Linux / macOS / Git Bash: use run-local.sh
+REM Maven package / test wrapper (library — no process). Linux / macOS / Git Bash: use build.sh
 REM
-REM   run-local.bat init | test | all
+REM   build.bat init | test | all
 
 set "MODULE_DIR=%~dp0"
 if "%MODULE_DIR:~-1%"=="\" set "MODULE_DIR=%MODULE_DIR:~0,-1%"
@@ -21,11 +21,11 @@ echo error: unknown command '%CMD%'
 goto :usage
 
 :usage
-echo Local biosdk-client ^(library — unit tests on MockWebServer :9098^)
+echo biosdk-client Maven wrapper ^(library — unit tests on MockWebServer :9098^)
 echo.
-echo   run-local.bat init     package this module ^(skip tests^)
-echo   run-local.bat test     Maven unit tests
-echo   run-local.bat all      init + test
+echo   build.bat init     package this module ^(skip tests^)
+echo   build.bat test     Maven unit tests
+echo   build.bat all      init + test
 exit /b 1
 
 :check_prereqs
