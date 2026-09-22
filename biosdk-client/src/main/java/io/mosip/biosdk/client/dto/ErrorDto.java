@@ -34,6 +34,12 @@ public class ErrorDto {
 	 */
 	private String message;
 
+	/**
+	 * Value equality on code and message.
+	 *
+	 * @param o other object
+	 * @return {@code true} if fields match
+	 */
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -44,11 +50,22 @@ public class ErrorDto {
 		return Objects.equals(code, errorDto.code) && Objects.equals(message, errorDto.message);
 	}
 
+	/**
+	 * Hash of code and message.
+	 *
+	 * @return hash code
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(code, message);
 	}
 
+	/**
+	 * Lombok-style type check used by generated equals.
+	 *
+	 * @param other candidate
+	 * @return {@code true} if {@code other} is this DTO type
+	 */
 	public boolean canEqual(Object other) {
 		return other instanceof ErrorDto;
 	}

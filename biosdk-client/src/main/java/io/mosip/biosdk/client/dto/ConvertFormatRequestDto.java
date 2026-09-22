@@ -57,6 +57,12 @@ public class ConvertFormatRequestDto {
 	 */
 	private List<BiometricType> modalitiesToConvert;
 
+	/**
+	 * Value equality on sample, formats, params, and modalities.
+	 *
+	 * @param o other object
+	 * @return {@code true} if fields match
+	 */
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -70,11 +76,22 @@ public class ConvertFormatRequestDto {
 				&& Objects.equals(modalitiesToConvert, that.modalitiesToConvert);
 	}
 
+	/**
+	 * Hash of sample, formats, params, and modalities.
+	 *
+	 * @return hash code
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(sample, sourceFormat, targetFormat, sourceParams, targetParams, modalitiesToConvert);
 	}
 
+	/**
+	 * Lombok-style type check used by generated equals.
+	 *
+	 * @param other candidate
+	 * @return {@code true} if {@code other} is this DTO type
+	 */
 	public boolean canEqual(Object other) {
 		return other instanceof ConvertFormatRequestDto;
 	}

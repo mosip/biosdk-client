@@ -1,0 +1,8 @@
+# Local run artifacts (run-local.bat / run-local.sh) — never commit
+.local/
+.idea/
+.mvn/
+# leftover path from older LoggerConfig; do not commit
+logs/
+pids/
+*.log

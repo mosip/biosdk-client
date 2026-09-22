@@ -44,6 +44,12 @@ public class SegmentRequestDto {
 	 */
 	private Map<String, String> flags;
 
+	/**
+	 * Value equality on sample, modalities, and flags.
+	 *
+	 * @param o other object
+	 * @return {@code true} if fields match
+	 */
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -55,11 +61,22 @@ public class SegmentRequestDto {
 				&& Objects.equals(flags, that.flags);
 	}
 
+	/**
+	 * Hash of sample, modalities, and flags.
+	 *
+	 * @return hash code
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(sample, modalitiesToSegment, flags);
 	}
 
+	/**
+	 * Lombok-style type check used by generated equals.
+	 *
+	 * @param other candidate
+	 * @return {@code true} if {@code other} is this DTO type
+	 */
 	public boolean canEqual(Object other) {
 		return other instanceof SegmentRequestDto;
 	}

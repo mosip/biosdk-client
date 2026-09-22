@@ -50,6 +50,12 @@ public class MatchRequestDto {
 	 */
 	private Map<String, String> flags;
 
+	/**
+	 * Value equality on sample, gallery, modalities, and flags.
+	 *
+	 * @param obj other object
+	 * @return {@code true} if fields match
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -62,6 +68,11 @@ public class MatchRequestDto {
 				&& Objects.equals(modalitiesToMatch, other.modalitiesToMatch) && Objects.equals(flags, other.flags);
 	}
 
+	/**
+	 * Hash of sample, gallery, modalities, and flags.
+	 *
+	 * @return hash code
+	 */
 	@Override
 	public int hashCode() {
 		int result = Objects.hash(sample, modalitiesToMatch, flags); // Generate a hash code based on the fields
@@ -69,6 +80,12 @@ public class MatchRequestDto {
 		return result;
 	}
 
+	/**
+	 * Lombok-style type check used by generated equals.
+	 *
+	 * @param other candidate
+	 * @return {@code true} if {@code other} is this DTO type
+	 */
 	public boolean canEqual(Object other) {
 		return other instanceof MatchRequestDto; // Check if the object is of the same class
 	}

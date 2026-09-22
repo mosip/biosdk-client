@@ -46,6 +46,12 @@ public class ResponseDto<T> {
 	 */
 	private List<ErrorDto> errors;
 
+	/**
+	 * Value equality on version, time, payload, and errors.
+	 *
+	 * @param o other object
+	 * @return {@code true} if fields match
+	 */
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -57,11 +63,22 @@ public class ResponseDto<T> {
 				&& Objects.equals(response, that.response) && Objects.equals(errors, that.errors);
 	}
 
+	/**
+	 * Hash of version, time, payload, and errors.
+	 *
+	 * @return hash code
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(version, responsetime, response, errors);
 	}
 
+	/**
+	 * Lombok-style type check used by generated equals.
+	 *
+	 * @param other candidate
+	 * @return {@code true} if {@code other} is this DTO type
+	 */
 	public boolean canEqual(Object other) {
 		return other instanceof ResponseDto;
 	}

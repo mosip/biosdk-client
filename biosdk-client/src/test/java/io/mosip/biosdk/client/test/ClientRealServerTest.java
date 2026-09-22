@@ -13,6 +13,7 @@ import io.mosip.biosdk.client.config.LoggerConfig;
 import io.mosip.kernel.biometrics.model.MatchDecision;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -21,6 +22,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@EnabledIfSystemProperty(named = "biosdk.real.server", matches = "true")
 class ClientRealServerTest {
 
 	private static final String REAL_SERVER_URL = "http://localhost:9099/biosdk-service";
@@ -76,7 +78,7 @@ class ClientRealServerTest {
 		sampleRecord.setSegments(Collections.singletonList(bir));
 	}
 
-	//@Test
+	@Test
 	@Order(0)
 	@DisplayName("Test init() loads URLs, sets config params, and returns SDKInfo")
 	void testInit() throws Exception {
@@ -99,7 +101,7 @@ class ClientRealServerTest {
 		assertEquals("sampleValue", System.getProperty("sampleKey"), "Config parameter should be set as system property");
 	}
 
-	//@Test
+	@Test
 	@Order(1)
 	@DisplayName("Test extractTemplate() with real server")
 	void testExtractTemplate() throws Exception {
@@ -112,7 +114,7 @@ class ClientRealServerTest {
 		logger.info("✅ extractTemplate returned: {}", response);
 	}
 
-	//@Test
+	@Test
 	@Order(2)
 	@DisplayName("Test segment() with real server")
 	void testSegment() throws Exception {
@@ -124,7 +126,7 @@ class ClientRealServerTest {
 		logger.info("✅ segment returned: {}", response);
 	}
 
-	//@Test
+	@Test
 	@Order(3)
 	@DisplayName("Test convertFormatV2() with real server")
 	void testConvertFormatV2() throws Exception {
@@ -145,7 +147,7 @@ class ClientRealServerTest {
 		logger.info("✅ convertFormatV2 returned: {}", response);
 	}
 
-	//@Test
+	@Test
 	@Order(4)
 	@DisplayName("Test match() with real server")
 	void testMatch() throws Exception {
@@ -171,7 +173,7 @@ class ClientRealServerTest {
 		logger.info("✅ match response: {}", Arrays.toString(response.getResponse()));
 	}
 
-	//@Test
+	@Test
 	@Order(5)
 	@DisplayName("Test checkQuality() with real server")
 	void testCheckQuality() throws Exception {

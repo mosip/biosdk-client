@@ -12,6 +12,11 @@ package io.mosip.biosdk.client.constant;
  * @since 1.0.0
  */
 public class AppConstants {
+	/**
+	 * Not instantiable; constants only.
+	 *
+	 * @throws IllegalStateException always
+	 */
 	public AppConstants() {
 		throw new IllegalStateException("AppConstants class");
 	}

@@ -68,9 +68,17 @@ public enum ResponseStatus {
 	 */
 	UNKNOWN_ERROR(500, "UNKNOWN_ERROR");
 
+	/** Numeric status used in {@link io.mosip.kernel.biometrics.model.Response}. */
 	private final int statusCode;
+	/** Human-readable status text (may contain {@code %s} for formatting). */
 	private final String statusMessage;
 
+	/**
+	 * Creates a status pair.
+	 *
+	 * @param statusCode    numeric code
+	 * @param statusMessage message template
+	 */
 	ResponseStatus(int statusCode, String statusMessage) {
 		this.statusCode = statusCode;
 		this.statusMessage = statusMessage;

@@ -31,6 +31,12 @@ public class RequestDto {
 	 */
 	private String request;
 
+	/**
+	 * Value equality on version and request payload.
+	 *
+	 * @param o other object
+	 * @return {@code true} if fields match
+	 */
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -41,11 +47,22 @@ public class RequestDto {
 		return Objects.equals(version, that.version) && Objects.equals(request, that.request);
 	}
 
+	/**
+	 * Hash of version and request payload.
+	 *
+	 * @return hash code
+	 */
 	@Override
 	public int hashCode() {
 		return Objects.hash(version, request);
 	}
 
+	/**
+	 * Lombok-style type check used by generated equals.
+	 *
+	 * @param other candidate
+	 * @return {@code true} if {@code other} is this DTO type
+	 */
 	public boolean canEqual(Object other) {
 		return other instanceof RequestDto;
 	}
