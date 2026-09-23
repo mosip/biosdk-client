@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Library runner — no Docker. Windows cmd: use run-local.bat
+# Maven package / test wrapper (library — no process). Windows cmd: use build.bat
 #
-#   ./run-local.sh init | test | all
+#   ./build.sh init | test | all
 set -euo pipefail
 
 MODULE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -16,15 +16,15 @@ MVN_SKIP=(
 
 usage() {
   cat <<'EOF'
-Local biosdk-client (library — unit tests on MockWebServer :9098)
+biosdk-client Maven wrapper (library — unit tests on MockWebServer :9098)
 
   Linux / macOS / Git Bash:
-    ./run-local.sh init | test | all
+    ./build.sh init | test | all
 
   Windows cmd:
-    run-local.bat init | test | all
+    build.bat init | test | all
 
-  init    Maven package this module (skip tests)
+  init    package this module (skip tests)
   test    Maven unit tests (MockWebServer :9098)
   all     init + test
 EOF

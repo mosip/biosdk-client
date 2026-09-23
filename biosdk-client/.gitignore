@@ -1,4 +1,4 @@
-# Local run artifacts (run-local.bat / run-local.sh) — never commit
+# Local Maven artifacts (build.bat / build.sh) — never commit
 .local/
 .idea/
 .mvn/
